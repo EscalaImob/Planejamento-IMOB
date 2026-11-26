@@ -28,9 +28,23 @@ export function Planejador({ captura = { ativa: false } }: { captura?: { ativa: 
   const [aviso, setAviso] = useState<string | null>(null);
   const [gerando, setGerando] = useState(false);
 
+  // A página é estática; o estado real da captura vem do servidor em tempo de execução
+  // (no Cloudflare os segredos não existem durante o build).
+  const [capturaAtiva, setCapturaAtiva] = useState(captura.ativa);
+
   // Origem da visita (UTMs e referral_id) capturada uma vez por sessão.
   useEffect(() => {
     capturarOrigem();
+    let vivo = true;
+    fetch("/api/leads/status", { cache: "no-store" })
+      .then((res) => (res.ok ? res.json() : null))
+      .then((d: unknown) => {
+        if (vivo && d && typeof (d as { ativa?: unknown }).ativa === "boolean") setCapturaAtiva((d as { ativa: boolean }).ativa);
+      })
+      .catch(() => {});
+    return () => {
+      vivo = false;
+    };
   }, []);
 
   const atualizarLimpando = (p: Parameters<typeof atualizar>[0]) => {
@@ -50,7 +64,6 @@ export function Planejador({ captura = { ativa: false } }: { captura?: { ativa: 
   }, [atualizar]);
 
   // Cadastro obrigatório antes do plano quando a captura está ativa (quem abriu por link compartilhado não precisa).
-  const capturaAtiva = captura.ativa;
   const precisaCadastro = capturaAtiva && !r.cadastrado && !r.viaLink;
 
   // Nunca exibir uma etapa cujos pré-requisitos não estão preenchidos (rascunho antigo ou link incompleto).

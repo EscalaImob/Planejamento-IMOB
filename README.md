@@ -166,12 +166,24 @@ Meta, Instagram, WhatsApp e Google são marcas de seus respectivos titulares. O 
 - [ ] Validação das premissas de cálculo pela Escala IMOB
 - [ ] Nomes das faixas do Índice de Aquisição (provisórios: Concentrada, Em expansão, Distribuída)
 - [ ] Planilha e Apps Script configurados (`integracoes/google-sheets/LEIA-ME.md`), com as variáveis da captura no `.env.local` e na hospedagem
-- [ ] Hospedagem com servidor Node (a rota `/api/leads` não funciona em hospedagem só estática)
+- [x] Hospedagem com servidor (Cloudflare Workers; a rota `/api/leads` não funciona em hospedagem só estática)
+- [ ] Desativar o projeto antigo na Vercel (os cadastros feitos lá não chegam à planilha)
+- [ ] Opcional: apontar `planejamento.escalaimob.com.br` para o Worker (exige o DNS do domínio no Cloudflare)
 - [ ] Integração futura com Pipedrive (colunas `crm_sync_status` e `crm_external_id` já previstas)
 
 ## Deploy
 
 Não fazer deploy em produção sem aprovação explícita.
+
+Produção: **Cloudflare Workers** (plano gratuito, permite uso comercial) via OpenNext, em
+https://escala-planejamento27.escalaimob.workers.dev. A Vercel Hobby foi descartada por proibir uso comercial.
+
+- Publicar: `npm run cf:deploy` (build + deploy; pede `npx wrangler login` na primeira vez). Não há deploy automático a partir do GitHub.
+- Testar localmente no runtime do Workers: `npm run cf:preview` (variáveis em `.dev.vars`, fora do git).
+- Segredos da captura: `npx wrangler secret put <NOME>`. Os scripts `integracoes/google-sheets/configurar-cloudflare.ps1`
+  (configuração inicial) e `novo-token-cloudflare.ps1` (troca do token) geram os valores sem exibi-los e copiam o token para colar no Apps Script.
+- `cacheComponents` fica desligado no `next.config.ts`: o adaptador OpenNext ainda não o suporta.
+- A página é estática; o navegador consulta `/api/leads/status` para saber se a captura está ativa (os segredos só existem em tempo de execução).
 
 ## Referência
 

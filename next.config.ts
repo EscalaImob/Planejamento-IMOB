@@ -1,9 +1,8 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
-  cacheComponents: true,
-  partialPrefetching: true,
+  // cacheComponents/partialPrefetching ficam desligados: o adaptador OpenNext para Cloudflare
+  // ainda não os suporta (a página inicial travava no runtime do Workers). O projeto não os usa.
   turbopack: {
     rules: {
       "*.css": {

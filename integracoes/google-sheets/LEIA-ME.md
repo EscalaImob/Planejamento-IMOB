@@ -64,5 +64,7 @@ LEADS_IP_SALT=<outro segredo aleatório, com 16 caracteres ou mais>
 
 - **Não renomeie nem apague colunas do cabeçalho.** O script grava pelo nome da coluna e recusa a gravação se faltar alguma; nesse caso, o site mostra erro e não libera o PDF. Reordenar as colunas ou acrescentar colunas no fim não tem problema.
 - **Compartilhamento:** deixe a planilha restrita (Compartilhar → Acesso geral: **Restrito**) e dê acesso só a quem precisa.
-- **Trocar o token:** rode `gerarToken` de novo e atualize `LEADS_SHEETS_TOKEN` no site. Não é preciso republicar.
+- **Trocar o token:** rode `powershell -ExecutionPolicy Bypass -File integracoes\google-sheets\novo-token-cloudflare.ps1`. Ele grava um token novo no Cloudflare e o copia; cole-o em `LEADS_TOKEN` (Configurações do projeto → Propriedades do script) e salve. Não é preciso republicar.
+- **Produção no Cloudflare:** os segredos ficam no Worker (`npx wrangler secret put`), não em `.env.local`. A configuração inicial é feita por `configurar-cloudflare.ps1`, na mesma pasta.
+- **Várias contas Google no navegador:** se o Apps Script der "Não foi possível abrir o arquivo", abra-o numa janela em que só a conta dona da planilha esteja logada.
 - **Cotas:** o Apps Script tem cotas diárias de execução, com folga para o volume esperado. Se um envio falhar, o site mostra "Tentar novamente" e não libera a exportação.
