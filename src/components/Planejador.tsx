@@ -12,6 +12,7 @@ import { Aviso } from "@/components/ui/Indicadores";
 import { usePlanejamento } from "@/lib/usePlanejamento";
 import { canalPodeAvancar, metaPodeAvancar, oportunidades, validarDiagnostico, vgv2026, vgv2027 } from "@/lib/calculos";
 import { moeda } from "@/lib/formatacao";
+import { capturarOrigem } from "@/lib/rastreamento";
 
 const SUBTITULOS = [
   "",
@@ -21,10 +22,15 @@ const SUBTITULOS = [
   "Seu plano de aquisição para 2027.",
 ];
 
-export function Planejador() {
+export function Planejador({ captura = { ativa: false, urlPolitica: null } }: { captura?: { ativa: boolean; urlPolitica: string | null } }) {
   const { respostas: r, pronto, atualizar, ir, podeIr, recomecar } = usePlanejamento();
   const [aviso, setAviso] = useState<string | null>(null);
   const [gerando, setGerando] = useState(false);
+
+  // Origem da visita (UTMs e referral_id) capturada uma vez por sessão.
+  useEffect(() => {
+    capturarOrigem();
+  }, []);
 
   const atualizarLimpando = (p: Parameters<typeof atualizar>[0]) => {
     setAviso(null);
@@ -109,7 +115,7 @@ export function Planejador() {
 
   return (
     <Casca {...base} etapa={4} barraEstatica fundoBranco>
-      <Plano r={r} onAjustar={() => irPara(1)} onRecomecar={recomecar} />
+      <Plano r={r} onAjustar={() => irPara(1)} onRecomecar={recomecar} capturaAtiva={captura.ativa} urlPolitica={captura.urlPolitica} />
     </Casca>
   );
 }

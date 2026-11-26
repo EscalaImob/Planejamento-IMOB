@@ -1,12 +1,13 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { BotaoPrincipal, BotaoSecundario } from "@/components/ui/Botao";
 import { Icone } from "@/components/ui/Icone";
 import { Anel, BarraH, COR_FAIXA } from "@/components/ui/Indicadores";
 import { Placa, type NomeIconePlaca } from "@/components/ui/Placa";
 import { Rede } from "@/components/ui/Rede";
 import { Funil } from "@/components/plano/Funil";
+import { ModalLead } from "@/components/lead/ModalLead";
 import { CANAIS } from "@/config/canais";
 import { DIAGNOSTICO_URL } from "@/config/ambiente";
 import { gerarLinkPlano, ROTULO_PERFIL, type Respostas } from "@/lib/estado";
@@ -26,6 +27,7 @@ import {
   type LinhaPlano,
 } from "@/lib/calculos";
 import { moeda, numero, percentual, quantidade, taxa } from "@/lib/formatacao";
+import { useCapturaLead } from "@/lib/useCapturaLead";
 
 const MESES = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"];
 
@@ -33,6 +35,9 @@ type Props = {
   r: Respostas;
   onAjustar: () => void;
   onRecomecar: () => void;
+  /** Captura de lead ao exportar (definida no servidor). */
+  capturaAtiva?: boolean;
+  urlPolitica?: string | null;
 };
 
 /* ───────── Peças ───────── */
@@ -171,7 +176,7 @@ function CartaoCanal({ l, i, r }: { l: LinhaPlano; i: number; r: Respostas }) {
 
 /* ───────── Plano ───────── */
 
-export function Plano({ r, onAjustar, onRecomecar }: Props) {
+export function Plano({ r, onAjustar, onRecomecar, capturaAtiva = false, urlPolitica = null }: Props) {
   const plano = useMemo(() => gerarPlano(r), [r]);
   const t = ticketMedio(r);
   const total26 = imoveis2026(r);
@@ -235,32 +240,38 @@ export function Plano({ r, onAjustar, onRecomecar }: Props) {
 
   /* Copiar link */
   const [copia, setCopia] = useState<"idle" | "ok" | "erro">("idle");
-  const copiar = async () => {
+  const copiar = useCallback(async (): Promise<boolean> => {
     const link = gerarLinkPlano(r);
+    let ok = false;
     try {
       await navigator.clipboard.writeText(link);
-      setCopia("ok");
+      ok = true;
     } catch {
       // Alternativa para navegadores que bloqueiam a API de área de transferência.
+      // Dentro de um <dialog> aberto o resto da página fica inerte, então o campo vai para o próprio dialog.
       const area = document.createElement("textarea");
       area.value = link;
       area.setAttribute("readonly", "");
       area.style.position = "fixed";
       area.style.opacity = "0";
-      document.body.appendChild(area);
+      (document.querySelector("dialog[open]") ?? document.body).appendChild(area);
       area.select();
-      let ok = false;
       try {
         ok = document.execCommand("copy");
       } catch {
         ok = false;
       }
       area.remove();
-      setCopia(ok ? "ok" : "erro");
     }
+    setCopia(ok ? "ok" : "erro");
     setTimeout(() => setCopia("idle"), 3500);
-  };
+    return ok;
+  }, [r]);
   const textoCopia = copia === "ok" ? "Link copiado" : copia === "erro" ? "Não foi possível copiar" : "Copiar link";
+
+  /* Captura de lead antes de salvar/exportar (desligada sem configuração no servidor) */
+  const executores = useMemo(() => ({ pdf: () => window.print(), link: copiar }), [copiar]);
+  const captura = useCapturaLead({ ativa: capturaAtiva && !!urlPolitica, respostas: r, executores });
 
   const recomecar = () => {
     if (window.confirm("Apagar todas as respostas salvas neste navegador e começar um novo planejamento?")) onRecomecar();
@@ -364,11 +375,11 @@ export function Plano({ r, onAjustar, onRecomecar }: Props) {
                 Seu plano <span className="font-normal text-corpo">· {r.perfil ? ROTULO_PERFIL[r.perfil] : "Corretor autônomo"}</span>
               </p>
               <div className="no-print flex flex-wrap gap-3">
-                <BotaoSecundario onClick={copiar} aria-live="polite">
+                <BotaoSecundario onClick={() => captura.solicitar("link")} aria-live="polite">
                   <Icone nome="link" tamanho={16} espessura={2} />
                   {textoCopia}
                 </BotaoSecundario>
-                <BotaoSecundario onClick={() => window.print()}>
+                <BotaoSecundario onClick={() => captura.solicitar("pdf")}>
                   <Icone nome="baixar" tamanho={16} espessura={2} />
                   Baixar PDF
                 </BotaoSecundario>
@@ -643,12 +654,12 @@ export function Plano({ r, onAjustar, onRecomecar }: Props) {
                 </>
               )}
               <div className="flex flex-wrap gap-3">
-                <BotaoPrincipal variante="contorno-escuro" onClick={() => window.print()}>
+                <BotaoPrincipal variante="contorno-escuro" onClick={() => captura.solicitar("pdf")}>
                   Baixar PDF
                 </BotaoPrincipal>
                 <button
                   type="button"
-                  onClick={copiar}
+                  onClick={() => captura.solicitar("link")}
                   className="h-12 rounded-full bg-white/10 px-[22px] text-[15px] font-semibold text-white ring-1 ring-white/40 ring-inset hover:bg-white/15"
                 >
                   {textoCopia}
@@ -663,6 +674,7 @@ export function Plano({ r, onAjustar, onRecomecar }: Props) {
           comissão.
         </p>
       </div>
+      {capturaAtiva && urlPolitica && <ModalLead c={captura.modal} urlPolitica={urlPolitica} linkPlano={() => gerarLinkPlano(r)} />}
     </div>
   );
 }

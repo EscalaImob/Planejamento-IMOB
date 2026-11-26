@@ -47,6 +47,12 @@ Acesse http://localhost:3000.
   - persistência após recarregar e âncoras internas válidas;
   - nenhum erro de console;
   - "Recomeçar", descarte de rascunho de outra versão e navegação por teclado (Tab, Espaço e contorno de foco visível).
+- **Captura de leads** (`tests/unit/lead.test.ts`, `tests/unit/api-leads.test.ts` e `tests/e2e/captura-lead.spec.ts`):
+  - telefone (máscara, DDD e E.164), validação por campo e indicadores recalculados no servidor;
+  - rota com antispam, limite por IP, idempotência, origem, tamanho, falha do Google e **nenhum dado pessoal em logs ou respostas**;
+  - escape de fórmulas na planilha;
+  - fluxo real até um Apps Script falso local: gravação, UTMs, consentimentos, eventos na ordem certa, PDF só depois da confirmação, sem novo pedido na mesma sessão, falha e queda de rede sem liberar a exportação, duplo clique, fechamento sem perda de dados, foco preso e layout em 390 e 1440 px.
+- Os testes de ponta a ponta rodam no **build de produção** (porta 3100), com a captura ligada por variáveis de teste e um Apps Script falso (porta 3999). Nada é enviado ao Google.
 - **Responsivo** (`tests/e2e/responsivo.spec.ts`): as 5 telas em 1440, 768 e 390 px, sem rolagem horizontal. As capturas ficam em `referencias/implementacao/`. Também gera o PDF do plano com o estilo de impressão (`plano-impressao.pdf`, A4), confirmando que a navegação e os botões são ocultados.
 
 **Comparação visual:** as telas foram comparadas com as capturas da referência (`referencias/desktop`, `referencias/mobile`). Ajustes feitos depois da comparação:
@@ -60,7 +66,14 @@ Acesse http://localhost:3000.
 |---|---|---|
 | `NEXT_PUBLIC_DIAGNOSTICO_URL` | Não | Link do Diagnóstico da Escala IMOB, usado no botão do fecho do plano. Sem valor válido (`https://…`), o botão fica **desabilitado**, com aviso. Não há endereço padrão. |
 
-A variável é embutida no build: depois de alterá-la, é preciso rodar `npm run build` de novo.
+| `LEADS_SHEETS_WEBHOOK_URL` | Para a captura | URL `/exec` do Apps Script (servidor) |
+| `LEADS_SHEETS_TOKEN` | Para a captura | Token compartilhado com o script (servidor, 24+ caracteres) |
+| `LEADS_IP_SALT` | Para a captura | Segredo do hash de IP (servidor, 16+ caracteres) |
+| `PRIVACY_POLICY_VERSION` | Para a captura | Versão da Política de Privacidade gravada em cada lead |
+| `NEXT_PUBLIC_PRIVACY_POLICY_URL` | Para a captura | Link da política exibido no modal |
+| `LEADS_ALLOWED_ORIGINS`, `LEADS_RATE_LIMIT` | Não | Domínios extras permitidos; envios por IP a cada 10 min (padrão 5) |
+
+As variáveis são lidas no build: depois de alterá-las, é preciso rodar `npm run build` de novo. **Sem as 5 variáveis da captura, ela fica desligada** e as exportações funcionam direto, como antes. Configuração: [`integracoes/google-sheets/LEIA-ME.md`](integracoes/google-sheets/LEIA-ME.md).
 
 Com o link configurado, ele aparece em dois lugares:
 - no botão do fecho do plano, que abre em nova aba;
@@ -68,10 +81,15 @@ Com o link configurado, ele aparece em dois lugares:
 
 ## Dados e privacidade
 
-- Não há cadastro: nenhum nome, telefone ou e-mail é pedido.
+- Preencher e ver o plano **não exige cadastro**.
+- **Ao exportar** (Baixar PDF ou Copiar link), com a captura ligada, um modal pede nome completo, WhatsApp e e-mail, com ciência **obrigatória** da Política de Privacidade e autorização de marketing **opcional e desmarcada**. O lead e os principais números do plano (perfil, VGV atual e alvo, ticket médio, vendas e comissão alvo) são gravados numa **planilha privada do Google Sheets** da Escala IMOB, pela rota `/api/leads`. O modal informa essa finalidade.
+- A exportação só é liberada depois que a gravação é confirmada. Fechar o modal não apaga o plano. Na mesma sessão do navegador, os dados não são pedidos de novo (isso é só conveniência, não autentica nada).
+- Proteções: validação no navegador e no servidor, segredos só no servidor, campo invisível e tempo mínimo contra robôs, limite por IP (gravado só como hash), retentativas idempotentes, escape de fórmulas, nenhum dado pessoal em logs ou eventos.
+- UTMs e `referral_id` da URL de entrada ficam em `sessionStorage` durante a navegação e vão junto com o lead. Eles não entram no link compartilhável.
+- Eventos `lead_form_opened`, `lead_submitted` (só depois da confirmação), `lead_submission_failed` e `planning_exported` são publicados como `CustomEvent("escala:evento")` e em `window.dataLayer`, se existir, sem dados pessoais nem financeiros. Hoje não há ferramenta de analytics instalada.
 - As respostas ficam **apenas no navegador** (`localStorage`, chave `escala-imob:planejamento-2027`, formato versionado `versao: 1`). É possível apagar o rascunho e recomeçar.
 - O link compartilhável leva só as respostas numéricas no fragmento `#plano=…` do endereço. Ele não contém dados de contato e não é enviado a nenhum servidor.
-- Não há integração com APIs externas, analytics ou pixels.
+- Fora a captura de leads, não há integração com APIs externas, analytics ou pixels.
 
 ## Estrutura
 
@@ -87,12 +105,20 @@ src/
     calculos.ts        cálculos de 2026, distribuição, Índice de Aquisição, plano e funis
     formatacao.ts      moeda, quantidades e percentuais em pt-BR
     usePlanejamento.ts hook de estado e navegação
+    lead.ts            validação do lead (cliente e servidor), telefone, indicadores
+    useCapturaLead.ts  fluxo do modal antes de exportar
+    rastreamento.ts    UTMs e referral_id
+    eventos.ts         eventos de produto (sem dados pessoais)
+  server/leads/        configuração, antispam, destino Google Sheets, escape de fórmulas
+  app/api/leads/       POST /api/leads
   components/
     casca/             trilho, barra, trilha de etapas e faixa fixa no mobile
     etapas/            telas de cada etapa
+    lead/              modal de captura e campos
     ui/                botões, campo de mais e menos, cartões, placas, chave, anel, régua
 assets/brand/          arquivos oficiais de marca recebidos
 public/brand/          cópias usadas pela interface
+integracoes/google-sheets/  script do Apps Script (Code.gs) e passo a passo (LEIA-ME.md)
 ```
 
 ## Premissas de cálculo (PROVISÓRIAS)
@@ -107,7 +133,7 @@ Todas as premissas ficam em `src/config/premissas.ts` e nos campos `peso`, `mesE
 - Uma meta abaixo da comissão de 2026 é aceita, mas exibe um aviso.
 - Quando a parceria divide a comissão e a soma fica abaixo da meta, o plano explica o motivo.
 - "Copiar link" informa quando a cópia falha e tenta um método alternativo.
-- Não há cadastro antes do plano. Depois de "Ajustar os números", é possível voltar ao plano pela trilha de etapas.
+- Não há cadastro antes do plano; o contato só é pedido ao exportar. A referência exigia cadastro antes de mostrar o plano. Depois de "Ajustar os números", é possível voltar ao plano pela trilha de etapas.
 - O plano inclui o botão "Recomeçar", que apaga o rascunho local.
 
 ## Identidade visual
@@ -139,6 +165,10 @@ Meta, Instagram, WhatsApp e Google são marcas de seus respectivos titulares. O 
 - [x] Grafia: "Escala IMOB" (decidido em 26/11/2026)
 - [ ] Validação das premissas de cálculo pela Escala IMOB
 - [ ] Nomes das faixas do Índice de Aquisição (provisórios: Concentrada, Em expansão, Distribuída)
+- [ ] **Política de Privacidade** publicada (URL e versão). **Bloqueia a ativação da captura de leads.**
+- [ ] Planilha e Apps Script configurados (`integracoes/google-sheets/LEIA-ME.md`), com as variáveis da captura no `.env.local` e na hospedagem
+- [ ] Hospedagem com servidor Node (a rota `/api/leads` não funciona em hospedagem só estática)
+- [ ] Integração futura com Pipedrive (colunas `crm_sync_status` e `crm_external_id` já previstas)
 
 ## Deploy
 

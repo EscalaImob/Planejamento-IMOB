@@ -1,0 +1,209 @@
+"use client";
+
+import { useCallback, useRef, useState } from "react";
+import type { Respostas } from "@/lib/estado";
+import {
+  errosDoFormulario,
+  MENSAGENS,
+  mascararTelefone,
+  type AcaoExportacao,
+  type CampoLead,
+  type EnvioLead,
+  type FormularioLead,
+} from "@/lib/lead";
+import { lerOrigem } from "@/lib/rastreamento";
+import { registrarEvento } from "@/lib/eventos";
+
+/**
+ * Captura de lead antes de Baixar PDF / Copiar link.
+ * - Desligada (sem configuração no servidor): executa a ação direto, como antes.
+ * - "Já salvo nesta sessão" é só conveniência de interface (sessionStorage), não autentica nada.
+ * - A ação só é liberada depois que o servidor confirma a gravação.
+ */
+export const CHAVE_SESSAO_LEAD = "escala-imob:lead-salvo-sessao";
+
+export type EstadoModal = "fechado" | "formulario" | "enviando" | "sucesso";
+
+export type Executores = {
+  pdf: () => void;
+  /** Devolve true se copiou. */
+  link: () => Promise<boolean>;
+};
+
+const FORM_VAZIO: FormularioLead = { nome: "", whatsapp: "", email: "", privacidade: false, marketing: false };
+
+function salvoNaSessao(): boolean {
+  try {
+    return window.sessionStorage.getItem(CHAVE_SESSAO_LEAD) === "1";
+  } catch {
+    return false;
+  }
+}
+
+function marcarSessao() {
+  try {
+    window.sessionStorage.setItem(CHAVE_SESSAO_LEAD, "1");
+  } catch {
+    /* sem efeito */
+  }
+}
+
+function novaChave(): string {
+  return typeof crypto !== "undefined" && crypto.randomUUID
+    ? crypto.randomUUID()
+    : "10000000-1000-4000-8000-100000000000".replace(/[018]/g, (c) =>
+        (Number(c) ^ (Math.random() * 16) >> (Number(c) / 4)).toString(16),
+      );
+}
+
+export function useCapturaLead({ ativa, respostas, executores }: { ativa: boolean; respostas: Respostas; executores: Executores }) {
+  const [estado, setEstado] = useState<EstadoModal>("fechado");
+  const [acao, setAcao] = useState<AcaoExportacao>("pdf");
+  const [form, setForm] = useState<FormularioLead>(FORM_VAZIO);
+  const [erros, setErros] = useState<Partial<Record<CampoLead, string>>>({});
+  const [tocados, setTocados] = useState<Partial<Record<CampoLead, boolean>>>({});
+  const [erroGeral, setErroGeral] = useState<string | null>(null);
+  const [copiado, setCopiado] = useState<boolean | null>(null);
+  const [site, setSite] = useState(""); // honeypot
+  const chave = useRef<string | null>(null);
+  const abertoEm = useRef(0);
+  const enviando = useRef(false);
+
+  const executar = useCallback(
+    async (qual: AcaoExportacao, comCadastro: boolean) => {
+      if (qual === "pdf") {
+        executores.pdf();
+        registrarEvento("planning_exported", { acao: "pdf", com_cadastro: comCadastro });
+        return true;
+      }
+      const ok = await executores.link();
+      if (ok) registrarEvento("planning_exported", { acao: "link", com_cadastro: comCadastro });
+      return ok;
+    },
+    [executores],
+  );
+
+  /** Clique em Baixar PDF / Copiar link. */
+  const solicitar = useCallback(
+    (qual: AcaoExportacao) => {
+      if (!ativa || salvoNaSessao()) {
+        void executar(qual, ativa);
+        return;
+      }
+      setAcao(qual);
+      setErroGeral(null);
+      setCopiado(null);
+      if (!chave.current) chave.current = novaChave();
+      abertoEm.current = Date.now();
+      setEstado("formulario");
+      registrarEvento("lead_form_opened", { acao: qual });
+    },
+    [ativa, executar],
+  );
+
+  const fechar = useCallback(() => {
+    if (enviando.current) return; // não fecha no meio do envio
+    setEstado("fechado");
+  }, []);
+
+  const alterar = useCallback(
+    <K extends CampoLead>(campo: K, valor: FormularioLead[K]) => {
+      const v = (campo === "whatsapp" ? mascararTelefone(String(valor)) : valor) as FormularioLead[K];
+      const novo = { ...form, [campo]: v };
+      setForm(novo);
+      if (tocados[campo]) setErros((e) => ({ ...e, [campo]: errosDoFormulario(novo)[campo] }));
+      setErroGeral(null);
+    },
+    [form, tocados],
+  );
+
+  const tocar = useCallback(
+    (campo: CampoLead) => {
+      setTocados((t) => ({ ...t, [campo]: true }));
+      setErros((e) => ({ ...e, [campo]: errosDoFormulario(form)[campo] }));
+    },
+    [form],
+  );
+
+  const enviar = useCallback(async (): Promise<CampoLead | null> => {
+    if (enviando.current) return null;
+    const errosLocais = errosDoFormulario(form);
+    setTocados({ nome: true, whatsapp: true, email: true, privacidade: true });
+    setErros(errosLocais);
+    const primeiro = (["nome", "whatsapp", "email", "privacidade"] as CampoLead[]).find((c) => errosLocais[c]);
+    if (primeiro) return primeiro;
+
+    enviando.current = true;
+    setEstado("enviando");
+    setErroGeral(null);
+    const corpo: EnvioLead = {
+      ...form,
+      privacidade: true, // validado acima
+
+      submission_key: chave.current ?? (chave.current = novaChave()),
+      acao,
+      tempo_ms: Math.max(0, Date.now() - abertoEm.current),
+      site,
+      origem: lerOrigem(),
+      respostas,
+    };
+
+    let motivo = "rede";
+    try {
+      const resposta = await fetch("/api/leads", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(corpo),
+        signal: AbortSignal.timeout(25_000),
+      });
+      const dados = (await resposta.json().catch(() => ({}))) as { ok?: boolean; erro?: string; campos?: Partial<Record<CampoLead, string>> };
+      if (resposta.ok && dados.ok === true) {
+        enviando.current = false;
+        marcarSessao();
+        chave.current = null;
+        registrarEvento("lead_submitted", { acao });
+        setEstado("sucesso");
+        if (acao === "link") {
+          setCopiado(await executar("link", true));
+        } else {
+          // Mostra a confirmação e então abre a impressão (o modal não sai no PDF).
+          window.setTimeout(() => {
+            setEstado("fechado");
+            window.setTimeout(() => void executar("pdf", true), 150);
+          }, 900);
+        }
+        return null;
+      }
+      if (resposta.status === 400 && dados.campos) {
+        const mapeados: Partial<Record<CampoLead, string>> = {};
+        for (const [c, m] of Object.entries(dados.campos) as [CampoLead, string][]) {
+          mapeados[c] = MENSAGENS[c as keyof typeof MENSAGENS] ?? m;
+        }
+        setErros(mapeados);
+        motivo = "validacao";
+        setErroGeral("Revise os campos destacados.");
+      } else if (resposta.status === 429) {
+        motivo = "limite";
+        setErroGeral("Muitas tentativas em pouco tempo. Aguarde alguns minutos e tente novamente.");
+      } else {
+        motivo = `http_${resposta.status}`;
+        setErroGeral("Não foi possível salvar agora. Seus dados continuam aqui: tente novamente em instantes.");
+      }
+    } catch {
+      setErroGeral("Sem conexão com o servidor. Verifique sua internet e tente novamente.");
+    }
+    enviando.current = false;
+    registrarEvento("lead_submission_failed", { acao, motivo });
+    setEstado("formulario");
+    return null;
+  }, [acao, executar, form, respostas, site]);
+
+  const copiarDeNovo = useCallback(async () => setCopiado(await executar("link", true)), [executar]);
+
+  return {
+    solicitar,
+    modal: { estado, acao, form, erros, erroGeral, copiado, site, setSite, alterar, tocar, enviar, fechar, copiarDeNovo },
+  };
+}
+
+export type ControleModalLead = ReturnType<typeof useCapturaLead>["modal"];

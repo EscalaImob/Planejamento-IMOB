@@ -583,7 +583,10 @@ Pontos fracos:
    - mostrar ao usuário final um aviso de que são estimativas com taxas médias provisórias, sem garantia de resultado;
    - registrar no README que as premissas aguardam validação da Escala IMOB.
    - Os textos das ações por canal ("O que fazer") e dos KPIs **não** fazem parte desta decisão: serão redigidos de forma original.
-2. **Gate de cadastro e integração de lead — DECIDIDO em 25/11/2026: sem cadastro.** Na Escala IMOB o plano abre sem pedir nome, telefone, e-mail ou aceite, e nenhum dado sai do navegador. Consequências para a implementação:
+2. **Gate de cadastro e integração de lead — DECIDIDO em 25/11/2026: sem cadastro.** Na Escala IMOB o plano abre sem pedir nome, telefone, e-mail ou aceite, e nenhum dado sai do navegador. 
+   - **REVISTO em 26/11/2026** (`PLANO_CAPTURA_LEADS.md`): o preenchimento e a visualização do plano continuam sem cadastro, mas **Baixar PDF** e **Copiar link** passam a pedir contato num modal, e o lead é gravado num Google Sheets privado (Apps Script). Os itens abaixo seguem valendo, exceto "nenhum dado sai do navegador".
+
+   Consequências para a implementação:
    - não há formulário, honeypot, `POST /api/lead`, fila de reenvio nem evento de lead;
    - não existe o estado "desbloqueado": o plano fica disponível assim que as etapas 1 a 3 forem válidas;
    - a abertura do plano não terá iniciais nem nome. Será usado um rótulo genérico com o perfil, por exemplo "Seu plano · Corretor autônomo";
