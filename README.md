@@ -64,7 +64,7 @@ Acesse http://localhost:3000.
 
 | Variável | Obrigatória | Uso |
 |---|---|---|
-| `NEXT_PUBLIC_DIAGNOSTICO_URL` | Não | Link do Diagnóstico da Escala IMOB, usado no botão do fecho do plano. Sem valor válido (`https://…`), o botão fica **desabilitado**, com aviso. Não há endereço padrão. |
+| `NEXT_PUBLIC_DIAGNOSTICO_URL` | Não | Link do Diagnóstico da Escala IMOB, usado no botão do fecho do plano e no PDF. **Padrão: `https://escalaimob.com.br`**, endereço oficial informado pelo responsável em 26/11/2026. Defina a variável só para trocar o endereço; um valor inválido desabilita o botão, com aviso. |
 
 | `LEADS_SHEETS_WEBHOOK_URL` | Para a captura | URL `/exec` do Apps Script (servidor) |
 | `LEADS_SHEETS_TOKEN` | Para a captura | Token compartilhado com o script (servidor, 24+ caracteres) |

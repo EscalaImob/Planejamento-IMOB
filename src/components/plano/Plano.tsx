@@ -42,15 +42,15 @@ type Props = {
 
 /* ───────── Peças ───────── */
 
-function Secao({ n, id, titulo, children }: { n: number; id: string; titulo: string; children: ReactNode }) {
+function Secao({ n, id, titulo, novaPagina, children }: { n: number; id: string; titulo: string; novaPagina?: boolean; children: ReactNode }) {
   return (
-    <section id={id} aria-labelledby={`${id}-t`} className="escuro grid min-w-0 grid-cols-[minmax(0,1fr)] scroll-mt-[calc(var(--topo)+84px)] gap-4 rounded-painel bg-noite p-[clamp(12px,2vw,28px)]">
-      <header className="flex items-center gap-[clamp(14px,2vw,22px)] px-[clamp(6px,1vw,8px)] pt-[clamp(8px,1.4vw,12px)] pb-[clamp(10px,1.6vw,16px)] text-white">
-        <i className="num grid size-[clamp(52px,6vw,72px)] flex-none place-items-center rounded-[clamp(14px,1.6vw,20px)] bg-white text-[clamp(28px,3.4vw,40px)] text-tinta not-italic">
+    <section id={id} aria-labelledby={`${id}-t`} className={`escuro grid min-w-0 grid-cols-[minmax(0,1fr)] scroll-mt-[calc(var(--topo)+84px)] gap-4 rounded-painel bg-noite p-[clamp(12px,2vw,28px)] print:block print:space-y-4 print:rounded-none print:bg-white print:p-0 ${novaPagina ? "print:break-before-page" : ""}`}>
+      <header className="flex items-center gap-[clamp(14px,2vw,22px)] px-[clamp(6px,1vw,8px)] pt-[clamp(8px,1.4vw,12px)] pb-[clamp(10px,1.6vw,16px)] text-white print:px-0 print:text-tinta">
+        <i className="num grid size-[clamp(52px,6vw,72px)] flex-none place-items-center rounded-[clamp(14px,1.6vw,20px)] bg-white text-[clamp(28px,3.4vw,40px)] text-tinta not-italic print:bg-tinta print:text-white">
           {n}
         </i>
         <div>
-          <small className="block text-base font-semibold text-white/85">Seção {n} de 5</small>
+          <small className="block text-base font-semibold text-white/85 print:text-corpo">Seção {n} de 5</small>
           <h2 id={`${id}-t`} className="text-[clamp(28px,2.8vw,40px)] leading-[1.08] font-semibold tracking-[-0.04em] text-balance">
             {titulo}
           </h2>
@@ -127,7 +127,7 @@ function CartaoCanal({ l, i, r }: { l: LinhaPlano; i: number; r: Respostas }) {
   ];
   const nome = nomeCanal(l.canal, r.perfil);
   return (
-    <article id={`canal-${l.canal.id}`} aria-labelledby={`canal-${l.canal.id}-t`} className="scroll-mt-[calc(var(--topo)+84px)]">
+    <article id={`canal-${l.canal.id}`} aria-labelledby={`canal-${l.canal.id}-t`} className="scroll-mt-[calc(var(--topo)+84px)] print:break-before-page">
       <Bloco className="bg-papel">
         <CabecalhoBloco
           extra={
@@ -541,11 +541,11 @@ export function Plano({ r, onAjustar, onRecomecar, capturaAtiva = false, urlPoli
         </Secao>
 
         {/* 4. Calendário */}
-        <Secao n={4} id="secao-calendario" titulo="Quando cada canal começa">
+        <Secao n={4} novaPagina id="secao-calendario" titulo="Quando cada canal começa">
           <Bloco>
             <div className="overflow-x-auto">
-              <div className="grid min-w-[720px] grid-cols-[minmax(170px,240px)_repeat(12,minmax(36px,1fr))] text-sm" role="table" aria-label="Calendário de início dos canais em 2027">
-                <div role="row" className="contents">
+              <div className="min-w-[720px] text-sm" role="table" aria-label="Calendário de início dos canais em 2027">
+                <div role="row" className="grid grid-cols-[minmax(170px,240px)_repeat(12,minmax(36px,1fr))]">
                   <div role="columnheader" className="border-b border-fio-2 bg-papel py-3.5 pl-[clamp(20px,2.4vw,32px)] text-[15px] font-semibold text-corpo">Canal</div>
                   {MESES.map((m) => (
                     <div key={m} role="columnheader" className="border-b border-fio-2 bg-papel py-3.5 text-center text-[15px] font-semibold text-corpo">
@@ -554,7 +554,7 @@ export function Plano({ r, onAjustar, onRecomecar, capturaAtiva = false, urlPoli
                   ))}
                 </div>
                 {plano.linhas.map((l) => (
-                  <div key={l.canal.id} role="row" className="contents">
+                  <div key={l.canal.id} role="row" className="grid grid-cols-[minmax(170px,240px)_repeat(12,minmax(36px,1fr))]">
                     <div role="rowheader" className="flex items-center gap-3 overflow-hidden border-b border-fio-2 py-3 pr-3 pl-[clamp(20px,2.4vw,32px)] text-[17px] font-semibold whitespace-nowrap">
                       <Placa canal={l.canal.id} tamanho="p" />
                       <span className="truncate">{nomeCanal(l.canal, r.perfil)}</span>
@@ -580,18 +580,18 @@ export function Plano({ r, onAjustar, onRecomecar, capturaAtiva = false, urlPoli
         </Secao>
 
         {/* 5. Primeiros 30 dias e fecho */}
-        <Secao n={5} id="secao-30-dias" titulo="Os primeiros 30 dias">
-          <ol className="grid grid-cols-1 gap-4 pt-1 sm:grid-cols-2 xl:grid-cols-4">
+        <Secao n={5} novaPagina id="secao-30-dias" titulo="Os primeiros 30 dias">
+          <ol className="grid grid-cols-1 gap-4 pt-1 sm:grid-cols-2 xl:grid-cols-4 print:grid-cols-2 print:break-inside-avoid">
             {semanas.map((s, i) => (
-              <li key={s.titulo} className="quebra-evitar flex min-w-0 flex-col">
-                <div className="mb-3.5 flex items-center gap-3 text-[15px] font-semibold whitespace-nowrap text-white/85">
-                  <i className={`num grid size-11 flex-none place-items-center rounded-[14px] text-[22px] not-italic ${i === 0 ? "bg-vivo text-noite" : "bg-white text-tinta"}`}>
+              <li key={s.titulo} className="flex min-w-0 flex-col">
+                <div className="mb-3.5 flex items-center gap-3 text-[15px] font-semibold whitespace-nowrap text-white/85 print:text-corpo">
+                  <i className={`num grid size-11 flex-none place-items-center rounded-[14px] text-[22px] not-italic ${i === 0 ? "bg-vivo text-noite" : "bg-white text-tinta print:bg-tinta print:text-white"}`}>
                     {i + 1}
                   </i>
                   <span>{s.dias}</span>
-                  <span className="hidden h-0.5 flex-1 rounded bg-white/20 sm:block" aria-hidden="true" />
+                  <span className="hidden h-0.5 flex-1 rounded bg-white/20 sm:block print:bg-fio" aria-hidden="true" />
                 </div>
-                <div className="flex flex-1 flex-col overflow-hidden rounded-3xl bg-white text-tinta">
+                <div className="flex flex-1 flex-col overflow-hidden rounded-3xl bg-white text-tinta print:border print:border-fio">
                   <header className="flex items-center gap-3.5 px-5 py-[18px]">
                     <Placa icone={s.icone} tamanho="m" />
                     <div>
@@ -605,22 +605,22 @@ export function Plano({ r, onAjustar, onRecomecar, capturaAtiva = false, urlPoli
             ))}
           </ol>
 
-          <div className="mt-2 flex flex-wrap items-end justify-between gap-x-10 gap-y-6 border-t border-white/15 px-[clamp(6px,1vw,8px)] pt-[clamp(20px,2.6vw,32px)] pb-[clamp(8px,1.2vw,12px)] text-white">
+          <div className="mt-2 flex flex-wrap items-end justify-between gap-x-10 gap-y-6 border-t border-white/15 px-[clamp(6px,1vw,8px)] pt-[clamp(20px,2.6vw,32px)] pb-[clamp(8px,1.2vw,12px)] text-white print:break-inside-avoid print:border-fio print:px-0 print:text-tinta">
             <div>
-              <p className="text-base font-semibold text-white/85">Comissão, de 2026 para 2027</p>
+              <p className="text-base font-semibold text-white/85 print:text-corpo">Comissão, de 2026 para 2027</p>
               <p className="my-2.5 flex flex-wrap items-center gap-x-[clamp(12px,1.6vw,22px)] gap-y-2">
-                <span className="num text-[clamp(26px,3vw,40px)] text-white/85">{moeda(r.comissao)}</span>
-                <Icone nome="seta-direita" tamanho={28} className="text-white/60" />
-                <strong className="num text-[clamp(44px,6vw,84px)] tracking-[-0.05em] text-vivo">{moeda(r.meta)}</strong>
+                <span className="num text-[clamp(26px,3vw,40px)] text-white/85 print:text-corpo">{moeda(r.comissao)}</span>
+                <Icone nome="seta-direita" tamanho={28} className="text-white/60 print:text-corpo" />
+                <strong className="num text-[clamp(44px,6vw,84px)] tracking-[-0.05em] text-vivo print:text-azul">{moeda(r.meta)}</strong>
               </p>
-              <p className="text-[17px] text-white/85">
+              <p className="text-[17px] text-white/85 print:text-corpo">
                 {quantidade(plano.vendas2027)} imóveis no ano · {moeda(vgv2027(r))} de VGV · {plano.linhas.length} canais
               </p>
               {DIAGNOSTICO_URL && (
-                <p className="mt-6 hidden rounded-2xl border border-white/25 px-5 py-4 text-base text-white print:block">
+                <p className="mt-6 hidden rounded-2xl border border-white/25 px-5 py-4 text-base text-white print:block print:border-azul print:bg-azul-claro print:text-tinta">
                   <b className="block font-semibold">Próximo passo: Diagnóstico da Escala IMOB</b>
                   Este plano cobre o pilar Aquisição. Para uma análise da operação como um todo, acesse{" "}
-                  <a href={DIAGNOSTICO_URL} className="font-semibold text-vivo underline">
+                  <a href={DIAGNOSTICO_URL} className="font-semibold text-vivo underline print:text-azul">
                     {DIAGNOSTICO_URL.replace(/^https?:\/\//, "").replace(/\/$/, "")}
                   </a>
                 </p>

@@ -134,6 +134,20 @@ body {
     size: A4;
     margin: 10mm;
   }
+  /* Escala de 80%: a área útil do A4 (~718 px) passa a valer ~900 px de layout, o suficiente para
+     os cartões de canal usarem o arranjo lado a lado (funil + indicadores) e caberem numa página. */
+  /* No <body>, não no <html>: com zoom no <html> o Chrome deixava de desenhar a seção do calendário no PDF. */
+  body {
+    zoom: 0.8;
+  }
+  /* O Chrome imprime algumas sombras como blocos sólidos pretos: no papel, sem sombras. */
+  *,
+  *::before,
+  *::after {
+    box-shadow: none !important;
+    text-shadow: none !important;
+    filter: none !important;
+  }
   html,
   body,
   main {
