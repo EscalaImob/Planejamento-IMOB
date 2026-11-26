@@ -51,7 +51,7 @@ export function BotaoPrincipal({
   return (
     <button
       type="button"
-      className={`${base} ${tamanho} ${cor} ${cheio ? "w-full justify-between" : ""} ${className}`}
+      className={`${base} ${tamanho} ${cor} ${cheio ? "h-auto min-h-14 w-full justify-between py-[7px] text-left leading-tight whitespace-normal" : ""} ${className}`}
       {...props}
     >
       <span>{children}</span>

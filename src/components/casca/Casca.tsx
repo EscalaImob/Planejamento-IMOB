@@ -1,8 +1,8 @@
 "use client";
 
-/* eslint-disable @next/next/no-img-element */
 import type { ReactNode } from "react";
 import { BotaoPrincipal } from "@/components/ui/Botao";
+import { Isotipo } from "@/components/ui/Isotipo";
 import { Icone, type NomeIcone } from "@/components/ui/Icone";
 
 export const ETAPAS: { nome: string; icone: NomeIcone }[] = [
@@ -48,7 +48,7 @@ export function Casca({ etapa, subtitulo, podeIr, onIr, seguir, faixa, semBarra,
           aria-label="Escala IMOB — voltar ao início do planejamento"
           className="grid h-14 place-items-center lg:h-16"
         >
-          <img src="/brand/escala-imob-icone.png" alt="" width={30} height={30} className="size-[26px] rounded-md lg:size-[30px]" />
+          <Isotipo tamanho={40} className="text-azul" />
         </button>
         <nav aria-label="Etapas" className="ml-auto flex gap-1 lg:ml-0 lg:grid lg:w-full lg:gap-0.5 lg:px-3 lg:pt-4">
           {ETAPAS.map((e, i) => {

@@ -149,11 +149,16 @@ const TAMANHOS = {
 };
 
 /**
- * Logomarcas oficiais (decisão de 25/11/2026). Os arquivos devem ser obtidos nos centros de marca
- * oficiais e salvos em public/third-party/. Enquanto `LOGOS_DISPONIVEIS` não listar a plataforma,
- * a placa usa o ícone próprio equivalente.
+ * Logomarcas oficiais das plataformas (decisão de 25/11/2026; arquivos fornecidos pelo responsável
+ * em 26/11/2026, em public/third-party/). Usadas sem alteração, só para identificar o canal.
+ * Uma plataforma fora desta lista usa o ícone próprio equivalente.
  */
-export const LOGOS_DISPONIVEIS: Partial<Record<PlataformaLogo, string>> = {};
+export const LOGOS_DISPONIVEIS: Partial<Record<PlataformaLogo, string>> = {
+  meta: "/third-party/meta.webp",
+  instagram: "/third-party/instagram.webp",
+  whatsapp: "/third-party/whatsapp.png",
+  "google-meu-negocio": "/third-party/google-meu-negocio.webp",
+};
 
 const ICONE_DO_CANAL: Record<CanalId, NomeIconePlaca> = {
   trafego: "trafego",

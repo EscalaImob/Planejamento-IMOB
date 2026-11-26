@@ -110,28 +110,33 @@ Todas as premissas ficam em `src/config/premissas.ts` e nos campos `peso`, `mesE
 - Não há cadastro antes do plano. Depois de "Ajustar os números", é possível voltar ao plano pela trilha de etapas.
 - O plano inclui o botão "Recomeçar", que apaga o rascunho local.
 
-## Identidade visual (provisória)
+## Identidade visual
+
+A fonte oficial é o **Manual de Marca** (`assets/brand/ESCALA-IMOB-MANUAL-DE-MARCA.pdf`, recebido em 26/11/2026).
 
 | Item | Situação |
 |---|---|
-| Logotipo e ícone | Arquivos oficiais em PNG (`assets/brand/`). **Pendente:** versões vetoriais (SVG). |
-| Azul principal `#0106FE` | **PROVISÓRIO.** Valor amostrado dos PNGs oficiais; aguarda confirmação no brandbook. |
-| Demais cores | **PROVISÓRIAS.** São derivações de interface (neutros, escuro, estados) definidas em `src/app/globals.css`, não especificações de marca. |
-| Tipografia | **PLACEHOLDER.** Pilha de fontes do sistema até a família oficial ser definida. |
-| Símbolo com telhado | O logotipo oficial contém uma forma de telhado. Ele é usado sem alteração, e nenhum outro elemento usa telhados, chaves ou prédios. Pendente de validação. |
-| Grafia "Escala IMOB" | Nome editorial provisório. |
+| Paleta | **OFICIAL** (manual, p. 8): Eletric Blue `#0106FE` (rgb 1, 6, 254), Black `#000000` e White `#FFFFFF`. O código do azul foi lido das instruções vetoriais do manual, que não traz o hexadecimal escrito. |
+| Cores de apoio | **Derivadas de interface**, fora do manual: tons claros e escuros do azul, cinzas de texto e fio, vermelho de erro e âmbar de alerta. Estão em `src/app/globals.css`. |
+| Tipografia | **OFICIAL** (manual, p. 9): Montserrat, carregada via `next/font` e servida pelo próprio site. |
+| Isotipo | **OFICIAL, vetorial.** Convertido das curvas de `assets/brand/vetor/escala-imob-vetor.pdf` para o componente `Isotipo` e para os SVGs em `assets/brand/vetor/` (azul, branco e preto). No trilho é usado com 40 px, a redução mínima do manual (p. 2). Também é o favicon (`src/app/icon.svg`). |
+| Logotipo completo (com o nome) | PNG oficial, usado na tela de transição. **Pendente:** SVG com o texto convertido em curvas. No PDF vetorial, "escala imob" é texto com fonte embutida, sem contornos. |
+| Símbolo com telhado | Resolvido pelo manual: o símbolo une "movimento ascendente de evolução" à "estrutura geométrica de um imóvel" (p. 2). Ele é usado sem alteração, e os demais ícones da interface não usam telhados, chaves ou prédios. |
+| Grafia da marca | **"Escala IMOB"**, por decisão do responsável em 26/11/2026, mesmo com o manual escrevendo "Escala Imob". O logotipo oficial, em minúsculas, é usado sem alteração. |
 
 ### Marcas de terceiros
 
-Os canais Tráfego pago, Social Selling, Lista Fria e Google Meu Negócio usarão as logomarcas oficiais de Meta, Instagram, WhatsApp e Google Maps (decisão de 25/11/2026). Os arquivos devem ser obtidos nos centros de marca oficiais e colocados em `public/third-party/`; depois, cada um é registrado em `LOGOS_DISPONIVEIS` (`src/components/ui/Placa.tsx`). Enquanto isso, a interface usa ícones próprios equivalentes.
+Os canais Tráfego pago, Social Selling, Lista Fria e Google Meu Negócio usam as logomarcas de Meta, Instagram, WhatsApp e Google Meu Negócio. Os arquivos foram fornecidos pelo responsável em 26/11/2026 e estão em `public/third-party/`, registrados em `LOGOS_DISPONIVEIS` (`src/components/ui/Placa.tsx`). Os outros canais usam ícones próprios.
 
 Meta, Instagram, WhatsApp e Google são marcas de seus respectivos titulares. O uso é apenas para identificar os canais e não indica parceria nem endosso.
 
 ## Pendências
 
 - [x] Endereço do Diagnóstico: `https://escalaimob.com.br`, informado pelo responsável em 26/11/2026 e configurado em `.env.local`. O `.env.local` não é versionado, então a variável também precisa ser definida no ambiente de hospedagem.
-- [ ] Brandbook: cores, tipografia e versões vetoriais do logotipo
-- [ ] Logomarcas oficiais de terceiros em `public/third-party/`
+- [x] Manual de marca: paleta, tipografia e isotipo vetorial aplicados
+- [x] Logomarcas de terceiros em `public/third-party/`
+- [ ] Logotipo completo em SVG, com o texto convertido em curvas
+- [x] Grafia: "Escala IMOB" (decidido em 26/11/2026)
 - [ ] Validação das premissas de cálculo pela Escala IMOB
 - [ ] Nomes das faixas do Índice de Aquisição (provisórios: Concentrada, Em expansão, Distribuída)
 

@@ -20,7 +20,7 @@ export const CANAL_IDS = [
 export type CanalId = (typeof CANAL_IDS)[number];
 
 /** Canais representados pela logomarca oficial da plataforma (arquivos em public/third-party). */
-export type PlataformaLogo = "meta" | "instagram" | "whatsapp" | "google-maps";
+export type PlataformaLogo = "meta" | "instagram" | "whatsapp" | "google-meu-negocio";
 
 export type Canal = {
   id: CanalId;
@@ -142,7 +142,7 @@ export const CANAIS: readonly Canal[] = [
     essencial: false,
     mesEntrada: 4,
     acima: 1,
-    logo: "google-maps",
+    logo: "google-meu-negocio",
     acoes: [
       "Completar o perfil e atualizar as fotos com frequência",
       "Pedir avaliação a cada cliente atendido e responder todas",

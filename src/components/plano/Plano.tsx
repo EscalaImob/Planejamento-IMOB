@@ -615,7 +615,7 @@ export function Plano({ r, onAjustar, onRecomecar }: Props) {
                 </p>
               )}
             </div>
-            <div className="no-print grid max-w-md gap-3">
+            <div className="no-print grid w-full min-w-0 max-w-md gap-3">
               <p className="text-[15px] leading-snug text-white/85">
                 Este plano cobre o pilar Aquisição. O Diagnóstico da Escala IMOB analisa a sua operação como um todo antes de qualquer recomendação.
               </p>
@@ -624,7 +624,7 @@ export function Plano({ r, onAjustar, onRecomecar }: Props) {
                   href={DIAGNOSTICO_URL}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="group inline-flex h-14 items-center justify-between gap-3 rounded-full bg-azul pr-[7px] pl-[26px] text-base font-semibold whitespace-nowrap text-white shadow-cta transition-[background-color,transform] duration-200 ease-mola hover:-translate-y-px hover:bg-azul-escuro active:scale-[0.97]"
+                  className="group inline-flex min-h-14 items-center justify-between gap-3 rounded-full bg-azul py-[7px] pr-[7px] pl-[26px] text-left text-base leading-tight font-semibold text-white shadow-cta transition-[background-color,transform] duration-200 ease-mola hover:-translate-y-px hover:bg-azul-escuro active:scale-[0.97]"
                 >
                   Fazer o Diagnóstico da Escala IMOB
                   <span className="grid size-[42px] place-items-center rounded-full bg-white text-azul">

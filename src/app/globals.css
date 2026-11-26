@@ -1,11 +1,13 @@
 @import "tailwindcss";
 
 /*
- * TOKENS DA ESCALA IMOB — PROVISÓRIOS
- * - --color-azul (#0106FE) foi amostrado dos arquivos oficiais em assets/brand/ (PNG). Aguarda validação no brandbook.
- * - Os demais tons são derivações provisórias para interface (neutros, escuros e estados), não especificações de marca.
- * - Tipografia: placeholder com a pilha de fontes do sistema até a família oficial ser definida.
- * Ver README.md › "Identidade visual (provisória)".
+ * TOKENS DA ESCALA IMOB
+ * OFICIAIS (assets/brand/ESCALA-IMOB-MANUAL-DE-MARCA.pdf, p. 8–9):
+ *   - Eletric Blue rgb(1, 6, 254) = #0106FE · Black #000000 · White #FFFFFF
+ *   - Tipografia: Montserrat (todos os pesos, com itálicos)
+ * DERIVADOS DE INTERFACE (não constam no manual; tons de apoio para estados, neutros e contraste):
+ *   - azul-escuro, azul-suave, azul-claro, vivo, corpo, fio, papel, risco, atencao
+ * Ver README.md › "Identidade visual".
  */
 @theme {
   --color-azul: #0106fe;
@@ -13,22 +15,20 @@
   --color-azul-suave: #c9ceff;
   --color-azul-claro: #eceeff;
 
-  --color-tinta: #0b0c1e;
-  --color-tinta-2: #23253a;
+  --color-tinta: #000000;
+  --color-tinta-2: #1f2033;
   --color-corpo: #4a4d66;
   --color-fio: #c8cbda;
   --color-fio-2: #dfe1eb;
   --color-papel: #f4f5fa;
   --color-papel-2: #e9ebf3;
 
-  --color-noite: #04061f;
+  --color-noite: #000000;
   --color-vivo: #aebcff;
 
   --color-risco: #c0262d;
   --color-risco-claro: #fdf2f2;
   --color-atencao: #9a5b00;
-
-  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 
   --radius-cartao: 28px;
   --radius-painel: 36px;
@@ -54,6 +54,11 @@
   }
 }
 
+/* Montserrat vem de next/font (variável --font-montserrat definida no <html>). */
+@theme inline {
+  --font-sans: var(--font-montserrat), ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+}
+
 :root {
   --trilho: 76px;
   --topo: 0px;
@@ -74,7 +79,7 @@ html {
 }
 
 body {
-  font-family: var(--font-sans);
+  font-family: var(--font-montserrat), ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
   color: var(--color-tinta);
   letter-spacing: -0.011em;
   line-height: 1.45;
