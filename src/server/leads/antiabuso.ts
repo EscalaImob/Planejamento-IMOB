@@ -6,8 +6,10 @@ export const TEMPO_MINIMO_MS = 2000;
 export const LIMITE_ENVIOS = 5;
 export const JANELA_MS = 10 * 60 * 1000;
 
-/** IP do visitante a partir dos cabeçalhos do proxy (Vercel e similares). */
+/** IP do visitante a partir dos cabeçalhos do proxy (Cloudflare primeiro; Vercel e similares depois). */
 export function ipDaRequisicao(req: Request): string {
+  const cloudflare = req.headers.get("cf-connecting-ip")?.trim();
+  if (cloudflare) return cloudflare;
   const encaminhado = req.headers.get("x-forwarded-for");
   if (encaminhado) return encaminhado.split(",")[0].trim();
   return req.headers.get("x-real-ip")?.trim() || "desconhecido";

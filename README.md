@@ -168,7 +168,7 @@ Meta, Instagram, WhatsApp e Google são marcas de seus respectivos titulares. O 
 - [ ] Planilha e Apps Script configurados (`integracoes/google-sheets/LEIA-ME.md`), com as variáveis da captura no `.env.local` e na hospedagem
 - [x] Hospedagem com servidor (Cloudflare Workers; a rota `/api/leads` não funciona em hospedagem só estática)
 - [ ] Desativar o projeto antigo na Vercel (os cadastros feitos lá não chegam à planilha)
-- [ ] Opcional: apontar `planejamento.escalaimob.com.br` para o Worker (exige o DNS do domínio no Cloudflare)
+- [x] Domínio próprio `planejamento27.escalaimob.com.br` (CNAME na Hostinger → Cloudflare Pages → Worker)
 - [ ] Integração futura com Pipedrive (colunas `crm_sync_status` e `crm_external_id` já previstas)
 
 ## Deploy
@@ -184,6 +184,9 @@ https://escala-planejamento27.escalaimob.workers.dev. A Vercel Hobby foi descart
   (configuração inicial) e `novo-token-cloudflare.ps1` (troca do token) geram os valores sem exibi-los e copiam o token para colar no Apps Script.
 - `cacheComponents` fica desligado no `next.config.ts`: o adaptador OpenNext ainda não o suporta.
 - A página é estática; o navegador consulta `/api/leads/status` para saber se a captura está ativa (os segredos só existem em tempo de execução).
+- Domínio próprio: **https://planejamento27.escalaimob.com.br**. O DNS continua na Hostinger (CNAME `planejamento27` →
+  `escala-planejamento.pages.dev`). O projeto Cloudflare Pages `escala-planejamento` (`cloudflare/dominio/`) só repassa
+  cada requisição ao Worker por service binding; publicar com `npx wrangler pages deploy` dentro dessa pasta (raramente necessário).
 
 ## Referência
 

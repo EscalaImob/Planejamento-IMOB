@@ -1,0 +1,9 @@
+// Projeto Cloudflare Pages que só encaminha o subdomínio próprio ao Worker "escala-planejamento27".
+// Publicar: npx wrangler pages deploy (dentro desta pasta).
+{
+  "$schema": "../../node_modules/wrangler/config-schema.json",
+  "name": "escala-planejamento",
+  "pages_build_output_dir": "./publico",
+  "compatibility_date": "2026-11-01",
+  "services": [{ "binding": "APP", "service": "escala-planejamento27" }]
+}
