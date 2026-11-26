@@ -32,6 +32,10 @@ export const esquemaRespostas = z.object({
   meta: positivo.nullable(),
   /** Indica que o plano já foi gerado ao menos uma vez (permite voltar a ele). */
   planoGerado: z.boolean(),
+  /** Cadastro (etapa "Seu plano") confirmado pelo servidor. Conveniência de interface, não autentica nada. */
+  cadastrado: z.boolean().default(false),
+  /** Plano aberto por link compartilhado: quem recebeu o link vê o plano sem a etapa de cadastro. */
+  viaLink: z.boolean().default(false),
 });
 
 export type Respostas = z.infer<typeof esquemaRespostas>;
@@ -49,6 +53,8 @@ export function respostasIniciais(): Respostas {
     vendasPorCanal: {},
     meta: null,
     planoGerado: false,
+    cadastrado: false,
+    viaLink: false,
   };
 }
 
@@ -96,7 +102,7 @@ export function apagarRascunho(): void {
 
 /* ───────── Link compartilhável (somente respostas, sem dados pessoais) ───────── */
 
-const esquemaLink = esquemaRespostas.omit({ etapa: true, planoGerado: true });
+const esquemaLink = esquemaRespostas.omit({ etapa: true, planoGerado: true, cadastrado: true, viaLink: true });
 
 function base64Url(texto: string): string {
   const bytes = new TextEncoder().encode(texto);
@@ -112,7 +118,7 @@ function deBase64Url(codigo: string): string {
 
 export function gerarLinkPlano(respostas: Respostas): string {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { etapa, planoGerado, ...dados } = respostas;
+  const { etapa, planoGerado, cadastrado, viaLink, ...dados } = respostas;
   return `${window.location.origin}${window.location.pathname}#plano=${base64Url(JSON.stringify(dados))}`;
 }
 
@@ -122,7 +128,7 @@ export function lerLinkPlano(hash: string): Respostas | null {
   try {
     const lido = esquemaLink.safeParse(JSON.parse(deBase64Url(achado[1])));
     if (!lido.success) return null;
-    return { ...lido.data, etapa: 4, planoGerado: true };
+    return { ...lido.data, etapa: 4, planoGerado: true, cadastrado: false, viaLink: true };
   } catch {
     return null;
   }

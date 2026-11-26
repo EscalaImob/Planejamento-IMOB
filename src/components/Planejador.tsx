@@ -7,6 +7,7 @@ import { CartoesDiagnostico, PainelDiagnostico } from "@/components/etapas/Etapa
 import { CartaoCanais, PainelCanais } from "@/components/etapas/EtapaCanais";
 import { CartaoMeta, PainelMeta } from "@/components/etapas/EtapaMeta";
 import { Gerando } from "@/components/plano/Gerando";
+import { EtapaCadastro } from "@/components/etapas/EtapaCadastro";
 import { Plano } from "@/components/plano/Plano";
 import { Aviso } from "@/components/ui/Indicadores";
 import { usePlanejamento } from "@/lib/usePlanejamento";
@@ -48,8 +49,18 @@ export function Planejador({ captura = { ativa: false, urlPolitica: null } }: { 
     window.scrollTo({ top: 0 });
   }, [atualizar]);
 
+  // Cadastro obrigatório antes do plano quando a captura está ativa (quem abriu por link compartilhado não precisa).
+  const capturaAtiva = captura.ativa && !!captura.urlPolitica;
+  const precisaCadastro = capturaAtiva && !r.cadastrado && !r.viaLink;
+
   // Nunca exibir uma etapa cujos pré-requisitos não estão preenchidos (rascunho antigo ou link incompleto).
-  const etapaMaxima = validarDiagnostico(r) ? 1 : !canalPodeAvancar(r) ? 2 : !metaPodeAvancar(r) || !r.planoGerado ? 3 : 4;
+  const etapaMaxima = validarDiagnostico(r)
+    ? 1
+    : !canalPodeAvancar(r)
+      ? 2
+      : !metaPodeAvancar(r) || (!r.planoGerado && !precisaCadastro)
+        ? 3
+        : 4;
   useEffect(() => {
     if (pronto && r.etapa > etapaMaxima) atualizar({ etapa: etapaMaxima });
   }, [pronto, r.etapa, etapaMaxima, atualizar]);
@@ -57,6 +68,12 @@ export function Planejador({ captura = { ativa: false, urlPolitica: null } }: { 
   if (!pronto || r.etapa > etapaMaxima) return <div className="min-h-dvh bg-papel" aria-busy="true" />;
 
   const base = { subtitulo: SUBTITULOS[r.etapa], podeIr, onIr: irPara };
+
+  /** "Gerar meu plano": com captura ativa e sem cadastro, vai para a etapa de cadastro; senão gera o plano. */
+  const gerarPlano = () => {
+    if (precisaCadastro) irPara(4);
+    else setGerando(true);
+  };
 
   if (r.etapa === 1) {
     return (
@@ -104,7 +121,7 @@ export function Planejador({ captura = { ativa: false, urlPolitica: null } }: { 
           {...base}
           etapa={3}
           faixa={{ rotulo: "VGV necessário em 2027", valor: moeda(vgv2027(r)) }}
-          seguir={{ texto: "Gerar meu plano", onClick: () => setGerando(true), desabilitado: !metaPodeAvancar(r) || gerando }}
+          seguir={{ texto: "Gerar meu plano", onClick: gerarPlano, desabilitado: !metaPodeAvancar(r) || gerando }}
         >
           <Moldura cartoes={<CartaoMeta r={r} atualizar={atualizar} />} painel={<PainelMeta r={r} />} />
         </Casca>
@@ -113,9 +130,40 @@ export function Planejador({ captura = { ativa: false, urlPolitica: null } }: { 
     );
   }
 
+  if (precisaCadastro) {
+    return (
+      <>
+        <Casca {...base} etapa={4} subtitulo="Falta só informar para quem é o plano.">
+          <EtapaCadastro
+            r={r}
+            urlPolitica={captura.urlPolitica!}
+            onConcluir={() => {
+              // Na mesma atualização: o plano fica disponível enquanto a transição "gerando" aparece por cima.
+              atualizar({ cadastrado: true, planoGerado: true, etapa: 4 });
+              setGerando(true);
+            }}
+          />
+        </Casca>
+        {gerando && <Gerando onConcluir={concluirGeracao} />}
+      </>
+    );
+  }
+
   return (
-    <Casca {...base} etapa={4} barraEstatica fundoBranco>
-      <Plano r={r} onAjustar={() => irPara(1)} onRecomecar={recomecar} capturaAtiva={captura.ativa} urlPolitica={captura.urlPolitica} />
-    </Casca>
+    <>
+      <Casca {...base} etapa={4} barraEstatica fundoBranco>
+        <Plano
+          r={r}
+          onAjustar={() => {
+            atualizar({ viaLink: false });
+            irPara(1);
+          }}
+          onRecomecar={recomecar}
+          capturaAtiva={capturaAtiva && !r.cadastrado}
+          urlPolitica={captura.urlPolitica}
+        />
+      </Casca>
+      {gerando && <Gerando onConcluir={concluirGeracao} />}
+    </>
   );
 }

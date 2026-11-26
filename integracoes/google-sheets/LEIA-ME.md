@@ -4,10 +4,12 @@ O site grava cada lead numa linha da aba `planning_leads` de uma planilha privad
 
 > Use uma **conta Google da Escala IMOB**, de preferência do Workspace, e não uma conta pessoal. Quem tiver acesso à planilha vê todos os leads.
 
-## 1. Criar a planilha
+## 1. Planilha
 
-1. No Google Drive da conta da Escala IMOB, crie uma planilha chamada **Leads — Planejamento 2027**.
-2. Não precisa criar a aba nem o cabeçalho; o script faz isso no passo 3.
+A planilha **[Leads — Planejamento 2027](https://docs.google.com/spreadsheets/d/1p55zvobR2sTqI8eIxAgfitVXmSh8sJ4i9g2Zn8crqh0/edit)** já foi criada em 26/11/2026, com a aba `planning_leads`, o cabeçalho de 28 colunas congelado, localidade pt-BR e fuso de São Paulo.
+
+- Ela está na conta Google conectada ao Claude nesta data (conta pessoal). Se os leads devem ficar numa conta **institucional** da Escala IMOB, transfira a propriedade da planilha (Compartilhar → transferir propriedade) ou crie outra planilha nessa conta; o script recria a aba e o cabeçalho se eles não existirem.
+- Faça os passos abaixo **com a conta dona da planilha**.
 
 ## 2. Colar o script
 

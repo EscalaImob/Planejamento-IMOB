@@ -102,12 +102,14 @@ export const esquemaOrigem = z.object(Object.fromEntries(CHAVES_ORIGEM.map((k) =
 
 /* ───────── Envio completo (cliente → rota) ───────── */
 
-export const ACOES_EXPORTACAO = ["pdf", "link"] as const;
-export type AcaoExportacao = (typeof ACOES_EXPORTACAO)[number];
+/** De onde veio o lead: etapa de cadastro antes do plano, ou exportação (PDF / link) de um plano aberto por link. */
+export const ACOES_LEAD = ["cadastro", "pdf", "link"] as const;
+export type AcaoLead = (typeof ACOES_LEAD)[number];
+export type AcaoExportacao = Exclude<AcaoLead, "cadastro">;
 
 export const esquemaEnvioLead = esquemaFormularioLead.extend({
   submission_key: z.uuid(),
-  acao: z.enum(ACOES_EXPORTACAO),
+  acao: z.enum(ACOES_LEAD),
   /** Tempo entre a abertura do modal e o envio (antispam). */
   tempo_ms: z.number().int().min(0).max(86_400_000),
   /** Honeypot: precisa chegar vazio. */

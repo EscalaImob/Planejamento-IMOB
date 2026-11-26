@@ -89,6 +89,15 @@ test("fluxo completo: validação, voltar, avançar e conclusão", async ({ page
   await expect(painel).toContainText("+150%");
   await gerar.click();
 
+  // Etapa 4 — cadastro obrigatório antes do plano (captura ligada no servidor de teste)
+  await expect(page.getByRole("heading", { name: "Para quem é o plano?" })).toBeVisible();
+  await page.getByLabel("Nome completo").fill("Maria Souza");
+  await page.getByLabel("WhatsApp", { exact: true }).pressSequentially("11987654321");
+  await page.getByLabel("E-mail", { exact: true }).fill("maria@exemplo.com");
+  await page.getByRole("checkbox", { name: /Política de Privacidade/ }).check();
+  await page.waitForTimeout(2100); // tempo mínimo do antispam
+  await page.getByRole("button", { name: "Gerar meu Plano 2027" }).click();
+
   // Transição e plano
   await expect(page.getByRole("status")).toBeVisible();
   await expect(page.getByRole("heading", { level: 1, name: /Para receber R\$ 300 mil/ })).toBeVisible({ timeout: 10_000 });
@@ -132,7 +141,7 @@ test("recomeçar apaga o rascunho local", async ({ page }) => {
         salvoEm: new Date().toISOString(),
         respostas: {
           etapa: 4, perfil: "corretor", comissao: 120000, percentual: 6, modoTicket: "ticket", ticket: 400000, imoveis: null,
-          canais: ["trafego"], vendasPorCanal: {}, meta: 300000, planoGerado: true,
+          canais: ["trafego"], vendasPorCanal: {}, meta: 300000, planoGerado: true, cadastrado: true,
         },
       }),
     );

@@ -81,8 +81,8 @@ Com o link configurado, ele aparece em dois lugares:
 
 ## Dados e privacidade
 
-- Preencher e ver o plano **não exige cadastro**.
-- **Ao exportar** (Baixar PDF ou Copiar link), com a captura ligada, um modal pede nome completo, WhatsApp e e-mail, com ciência **obrigatória** da Política de Privacidade e autorização de marketing **opcional e desmarcada**. O lead e os principais números do plano (perfil, VGV atual e alvo, ticket médio, vendas e comissão alvo) são gravados numa **planilha privada do Google Sheets** da Escala IMOB, pela rota `/api/leads`. O modal informa essa finalidade.
+- Com a captura ligada, a **etapa 4 ("Seu plano") é um cadastro obrigatório**, como na referência. Depois de "Gerar meu plano" na Meta 2027, a tela "Para quem é o plano?" pede os dados abaixo, e o plano só abre depois que o lead é gravado na planilha (decisão de 26/11/2026). Quem abre o plano por **link compartilhado** vê o plano direto; para essas pessoas, o modal aparece ao exportar.
+- **Ao exportar sem cadastro** (Baixar PDF ou Copiar link num plano aberto por link), um modal pede nome completo, WhatsApp e e-mail, com ciência **obrigatória** da Política de Privacidade e autorização de marketing **opcional e desmarcada**. O lead e os principais números do plano (perfil, VGV atual e alvo, ticket médio, vendas e comissão alvo) são gravados numa **planilha privada do Google Sheets** da Escala IMOB, pela rota `/api/leads`. O modal informa essa finalidade.
 - A exportação só é liberada depois que a gravação é confirmada. Fechar o modal não apaga o plano. Na mesma sessão do navegador, os dados não são pedidos de novo (isso é só conveniência, não autentica nada).
 - Proteções: validação no navegador e no servidor, segredos só no servidor, campo invisível e tempo mínimo contra robôs, limite por IP (gravado só como hash), retentativas idempotentes, escape de fórmulas, nenhum dado pessoal em logs ou eventos.
 - UTMs e `referral_id` da URL de entrada ficam em `sessionStorage` durante a navegação e vão junto com o lead. Eles não entram no link compartilhável.

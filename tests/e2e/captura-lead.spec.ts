@@ -18,6 +18,8 @@ const PLANO = {
   vendasPorCanal: { trafego: 2, indicacao: 1 },
   meta: 300000,
   planoGerado: true,
+  // O modal de exportação vale para quem abriu o plano por link compartilhado (sem passar pelo cadastro).
+  viaLink: true,
 };
 
 async function abrirPlano(page: Page, query = "") {
@@ -242,4 +244,89 @@ test("desktop 1440 px: captura do modal", async ({ page }) => {
   await dialogo(page).getByRole("button", { name: "Salvar meu planejamento" }).click();
   await page.waitForTimeout(400);
   await page.screenshot({ path: "referencias/implementacao/desktop-1440/6-modal-lead-validacao.png" });
+});
+
+/* ───────── Etapa de cadastro obrigatória antes do plano ───────── */
+
+async function abrirMeta(page: Page, query = "") {
+  await page.addInitScript(() => {
+    (window as unknown as { __prints: number }).__prints = 0;
+    window.print = () => {
+      (window as unknown as { __prints: number }).__prints++;
+    };
+    (window as unknown as { __eventos: string[] }).__eventos = [];
+    window.addEventListener("escala:evento", (e) =>
+      (window as unknown as { __eventos: string[] }).__eventos.push((e as CustomEvent).detail.evento),
+    );
+  });
+  await page.goto(`/${query}`);
+  await page.evaluate((respostas) => {
+    localStorage.clear();
+    sessionStorage.clear();
+    localStorage.setItem("escala-imob:planejamento-2027", JSON.stringify({ versao: 1, salvoEm: new Date().toISOString(), respostas }));
+  }, { ...PLANO, etapa: 3, planoGerado: false, viaLink: false, cadastrado: false });
+  await page.reload();
+  await expect(page.getByRole("heading", { name: "Meta de 2027" })).toBeVisible();
+}
+
+async function preencherCadastro(page: Page) {
+  await page.getByLabel("Nome completo").fill("Maria Souza");
+  await page.getByLabel("WhatsApp", { exact: true }).pressSequentially("11987654321");
+  await page.getByLabel("E-mail", { exact: true }).fill("maria@exemplo.com");
+  await page.getByRole("checkbox", { name: /Política de Privacidade/ }).check();
+  await page.waitForTimeout(2100);
+}
+
+test("cadastro obrigatório: grava na planilha e só então abre o plano; exportar não pede de novo", async ({ page }) => {
+  await abrirMeta(page, "?utm_source=google&utm_medium=cpc");
+  await page.getByRole("banner").getByRole("button", { name: /Gerar meu plano/ }).click();
+  await expect(page.getByRole("heading", { name: "Para quem é o plano?" })).toBeVisible();
+  await expect(page.getByRole("heading", { level: 1, name: /Para receber/ })).toHaveCount(0);
+
+  // validação individual
+  await page.getByRole("button", { name: "Gerar meu Plano 2027" }).click();
+  await expect(page.getByText("Informe seu nome completo (nome e sobrenome).")).toBeVisible();
+  await expect(page.getByLabel("Nome completo")).toBeFocused();
+  expect(await linhasPlanilha(page)).toHaveLength(0);
+
+  await preencherCadastro(page);
+  await page.getByRole("button", { name: "Gerar meu Plano 2027" }).click();
+  await expect(page.getByRole("heading", { level: 1, name: /Para receber R\$ 300 mil/ })).toBeVisible({ timeout: 10_000 });
+
+  const linhas = await linhasPlanilha(page);
+  expect(linhas).toHaveLength(1);
+  expect(linhas[0]).toMatchObject({
+    full_name: "Maria Souza",
+    email: "maria@exemplo.com",
+    source_action: "cadastro",
+    utm_source: "google",
+    utm_medium: "cpc",
+    current_vgv: 2000000,
+    commission_target: 300000,
+    marketing_consent: false,
+  });
+  expect(await eventos(page)).toEqual(expect.arrayContaining(["lead_form_opened", "lead_submitted"]));
+
+  // exportar depois do cadastro: direto, sem modal e sem nova linha
+  await page.getByRole("button", { name: "Baixar PDF" }).first().click();
+  await expect.poll(() => prints(page)).toBe(1);
+  await expect(dialogo(page)).toHaveCount(0);
+  expect(await linhasPlanilha(page)).toHaveLength(1);
+
+  // recarregar mantém o plano liberado
+  await page.reload();
+  await expect(page.getByRole("heading", { level: 1, name: /Para receber/ })).toBeVisible();
+});
+
+test("cadastro com falha na gravação: o plano não abre e os dados ficam no formulário", async ({ page }) => {
+  await abrirMeta(page);
+  await page.route("**/api/leads", (r) => r.fulfill({ status: 503, contentType: "application/json", body: JSON.stringify({ ok: false, erro: "indisponivel" }) }));
+  await page.getByRole("banner").getByRole("button", { name: /Gerar meu plano/ }).click();
+  await preencherCadastro(page);
+  await page.getByRole("button", { name: "Gerar meu Plano 2027" }).click();
+  await expect(page.getByRole("main").getByRole("alert")).toContainText("Não foi possível salvar agora");
+  await expect(page.getByLabel("Nome completo")).toHaveValue("Maria Souza");
+  await expect(page.getByRole("heading", { level: 1, name: /Para receber/ })).toHaveCount(0);
+  await page.reload();
+  await expect(page.getByRole("heading", { name: "Para quem é o plano?" })).toBeVisible();
 });

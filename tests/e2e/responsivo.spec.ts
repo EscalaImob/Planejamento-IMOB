@@ -28,7 +28,8 @@ const ESTADOS = [
   { nome: "2-diagnostico-preenchido", respostas: { ...BASE, etapa: 1 }, titulo: "Seu perfil" },
   { nome: "3-canais", respostas: { ...BASE, etapa: 2 }, titulo: "De onde vieram as suas 5 vendas" },
   { nome: "4-meta", respostas: { ...BASE, etapa: 3 }, titulo: "Meta de 2027" },
-  { nome: "5-plano", respostas: { ...BASE, etapa: 4, planoGerado: true }, titulo: null },
+  { nome: "5-cadastro", respostas: { ...BASE, etapa: 4 }, titulo: "Para quem é o plano?" },
+  { nome: "6-plano", respostas: { ...BASE, etapa: 4, planoGerado: true, cadastrado: true }, titulo: null },
 ] as const;
 
 async function semRolagemHorizontal(page: Page) {
@@ -64,7 +65,7 @@ test("PDF do plano (estilo de impressão)", async ({ page }) => {
   await page.goto("/");
   await page.evaluate((respostas) => {
     localStorage.setItem("escala-imob:planejamento-2027", JSON.stringify({ versao: 1, salvoEm: new Date().toISOString(), respostas }));
-  }, { ...BASE, etapa: 4, planoGerado: true });
+  }, { ...BASE, etapa: 4, planoGerado: true, cadastrado: true });
   await page.reload();
   await expect(page.getByRole("heading", { level: 1, name: /Para receber/ })).toBeVisible();
   await page.emulateMedia({ media: "print" });

@@ -6,7 +6,7 @@
 export type NomeEvento = "lead_form_opened" | "lead_submitted" | "lead_submission_failed" | "planning_exported";
 
 export type DadosEvento = {
-  acao?: "pdf" | "link";
+  acao?: "cadastro" | "pdf" | "link";
   motivo?: string;
   com_cadastro?: boolean;
 };
