@@ -1,0 +1,152 @@
+@import "tailwindcss";
+
+/*
+ * TOKENS DA ESCALA IMOB — PROVISÓRIOS
+ * - --color-azul (#0106FE) foi amostrado dos arquivos oficiais em assets/brand/ (PNG). Aguarda validação no brandbook.
+ * - Os demais tons são derivações provisórias para interface (neutros, escuros e estados), não especificações de marca.
+ * - Tipografia: placeholder com a pilha de fontes do sistema até a família oficial ser definida.
+ * Ver README.md › "Identidade visual (provisória)".
+ */
+@theme {
+  --color-azul: #0106fe;
+  --color-azul-escuro: #0004b3;
+  --color-azul-suave: #c9ceff;
+  --color-azul-claro: #eceeff;
+
+  --color-tinta: #0b0c1e;
+  --color-tinta-2: #23253a;
+  --color-corpo: #4a4d66;
+  --color-fio: #c8cbda;
+  --color-fio-2: #dfe1eb;
+  --color-papel: #f4f5fa;
+  --color-papel-2: #e9ebf3;
+
+  --color-noite: #04061f;
+  --color-vivo: #aebcff;
+
+  --color-risco: #c0262d;
+  --color-risco-claro: #fdf2f2;
+  --color-atencao: #9a5b00;
+
+  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+
+  --radius-cartao: 28px;
+  --radius-painel: 36px;
+  --radius-campo: 16px;
+
+  --shadow-cartao: 0 1px 2px rgb(4 6 31 / 0.05), 0 24px 48px -28px rgb(4 6 31 / 0.32);
+  --shadow-placa: 0 1px 2px rgb(4 6 31 / 0.06), 0 8px 18px -12px rgb(4 6 31 / 0.35);
+  --shadow-cta: 0 12px 28px -12px rgb(1 6 254 / 0.6);
+
+  --ease-mola: cubic-bezier(0.22, 1, 0.36, 1);
+
+  --animate-entra: entra 0.4s var(--ease-mola) both;
+
+  @keyframes entra {
+    from {
+      opacity: 0;
+      transform: translateY(14px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+}
+
+:root {
+  --trilho: 76px;
+  --topo: 0px;
+  color-scheme: light;
+}
+
+@media (max-width: 1023px) {
+  :root {
+    --trilho: 0px;
+    --topo: 56px;
+  }
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  -webkit-font-smoothing: antialiased;
+  background: #fff;
+}
+
+body {
+  font-family: var(--font-sans);
+  color: var(--color-tinta);
+  letter-spacing: -0.011em;
+  line-height: 1.45;
+}
+
+::selection {
+  background: var(--color-azul-suave);
+  color: var(--color-tinta);
+}
+
+/* Em @layer base para que utilitários (ex.: focus-visible:outline-none) possam sobrescrever. */
+@layer base {
+  :focus-visible {
+    outline: 2px solid var(--color-azul);
+    outline-offset: 2px;
+  }
+
+  .escuro :focus-visible {
+    outline-color: var(--color-vivo);
+  }
+}
+
+/* Números: algarismos tabulares e tracking fechado. */
+.num {
+  font-variant-numeric: tabular-nums;
+  font-weight: 650;
+  letter-spacing: -0.04em;
+  line-height: 1;
+}
+
+/* Campo numérico que cresce com o conteúdo, quando suportado. */
+@supports (field-sizing: content) {
+  .campo-auto {
+    field-sizing: content;
+    width: auto;
+    min-width: 1ch;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+@media print {
+  @page {
+    size: A4;
+    margin: 10mm;
+  }
+  html,
+  body,
+  main {
+    background: #fff !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  .no-print {
+    display: none !important;
+  }
+  .conteudo {
+    padding: 0 !important;
+  }
+  .quebra-evitar {
+    break-inside: avoid;
+    box-shadow: none !important;
+  }
+  .animate-entra {
+    animation: none !important;
+  }
+}
