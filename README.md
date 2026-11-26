@@ -69,11 +69,9 @@ Acesse http://localhost:3000.
 | `LEADS_SHEETS_WEBHOOK_URL` | Para a captura | URL `/exec` do Apps Script (servidor) |
 | `LEADS_SHEETS_TOKEN` | Para a captura | Token compartilhado com o script (servidor, 24+ caracteres) |
 | `LEADS_IP_SALT` | Para a captura | Segredo do hash de IP (servidor, 16+ caracteres) |
-| `PRIVACY_POLICY_VERSION` | Para a captura | Versão da Política de Privacidade gravada em cada lead |
-| `NEXT_PUBLIC_PRIVACY_POLICY_URL` | Para a captura | Link da política exibido no modal |
 | `LEADS_ALLOWED_ORIGINS`, `LEADS_RATE_LIMIT` | Não | Domínios extras permitidos; envios por IP a cada 10 min (padrão 5) |
 
-As variáveis são lidas no build: depois de alterá-las, é preciso rodar `npm run build` de novo. **Sem as 5 variáveis da captura, ela fica desligada** e as exportações funcionam direto, como antes. Configuração: [`integracoes/google-sheets/LEIA-ME.md`](integracoes/google-sheets/LEIA-ME.md).
+As variáveis são lidas no build: depois de alterá-las, é preciso rodar `npm run build` de novo. **Sem as 3 variáveis da captura, ela fica desligada** e as exportações funcionam direto, como antes. Configuração: [`integracoes/google-sheets/LEIA-ME.md`](integracoes/google-sheets/LEIA-ME.md).
 
 Com o link configurado, ele aparece em dois lugares:
 - no botão do fecho do plano, que abre em nova aba;
@@ -81,8 +79,10 @@ Com o link configurado, ele aparece em dois lugares:
 
 ## Dados e privacidade
 
+- **Sem Política de Privacidade no fluxo**, por decisão do responsável em 26/11/2026: o formulário não pede ciência de política e as colunas `privacy_policy_version` e `privacy_acknowledged_at` da planilha ficam em branco. Se uma política for publicada no futuro, a ciência pode voltar ao formulário.
+
 - Com a captura ligada, a **etapa 4 ("Seu plano") é um cadastro obrigatório**, como na referência. Depois de "Gerar meu plano" na Meta 2027, a tela "Para quem é o plano?" pede os dados abaixo, e o plano só abre depois que o lead é gravado na planilha (decisão de 26/11/2026). Quem abre o plano por **link compartilhado** vê o plano direto; para essas pessoas, o modal aparece ao exportar.
-- **Ao exportar sem cadastro** (Baixar PDF ou Copiar link num plano aberto por link), um modal pede nome completo, WhatsApp e e-mail, com ciência **obrigatória** da Política de Privacidade e autorização de marketing **opcional e desmarcada**. O lead e os principais números do plano (perfil, VGV atual e alvo, ticket médio, vendas e comissão alvo) são gravados numa **planilha privada do Google Sheets** da Escala IMOB, pela rota `/api/leads`. O modal informa essa finalidade.
+- **Ao exportar sem cadastro** (Baixar PDF ou Copiar link num plano aberto por link), um modal pede nome completo, WhatsApp e e-mail e autorização de marketing **opcional e desmarcada**. O lead e os principais números do plano (perfil, VGV atual e alvo, ticket médio, vendas e comissão alvo) são gravados numa **planilha privada do Google Sheets** da Escala IMOB, pela rota `/api/leads`. O modal informa essa finalidade.
 - A exportação só é liberada depois que a gravação é confirmada. Fechar o modal não apaga o plano. Na mesma sessão do navegador, os dados não são pedidos de novo (isso é só conveniência, não autentica nada).
 - Proteções: validação no navegador e no servidor, segredos só no servidor, campo invisível e tempo mínimo contra robôs, limite por IP (gravado só como hash), retentativas idempotentes, escape de fórmulas, nenhum dado pessoal em logs ou eventos.
 - UTMs e `referral_id` da URL de entrada ficam em `sessionStorage` durante a navegação e vão junto com o lead. Eles não entram no link compartilhável.
@@ -165,7 +165,6 @@ Meta, Instagram, WhatsApp e Google são marcas de seus respectivos titulares. O 
 - [x] Grafia: "Escala IMOB" (decidido em 26/11/2026)
 - [ ] Validação das premissas de cálculo pela Escala IMOB
 - [ ] Nomes das faixas do Índice de Aquisição (provisórios: Concentrada, Em expansão, Distribuída)
-- [ ] **Política de Privacidade** publicada (URL e versão). **Bloqueia a ativação da captura de leads.**
 - [ ] Planilha e Apps Script configurados (`integracoes/google-sheets/LEIA-ME.md`), com as variáveis da captura no `.env.local` e na hospedagem
 - [ ] Hospedagem com servidor Node (a rota `/api/leads` não funciona em hospedagem só estática)
 - [ ] Integração futura com Pipedrive (colunas `crm_sync_status` e `crm_external_id` já previstas)

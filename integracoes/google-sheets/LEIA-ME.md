@@ -45,8 +45,6 @@ No arquivo `.env.local` (desenvolvimento) e no painel da hospedagem (produção)
 LEADS_SHEETS_WEBHOOK_URL=https://script.google.com/macros/s/…/exec
 LEADS_SHEETS_TOKEN=<o mesmo valor de LEADS_TOKEN>
 LEADS_IP_SALT=<outro segredo aleatório, com 16 caracteres ou mais>
-PRIVACY_POLICY_VERSION=<versão da política, ex.: 2026-12-01>
-NEXT_PUBLIC_PRIVACY_POLICY_URL=<URL pública da Política de Privacidade>
 ```
 
 - **Não envie o token nem o salt por chat ou e-mail.**
@@ -54,7 +52,7 @@ NEXT_PUBLIC_PRIVACY_POLICY_URL=<URL pública da Política de Privacidade>
   ```powershell
   -join ((1..40) | ForEach-Object { [char](Get-Random -InputObject (48..57 + 65..90 + 97..122)) })
   ```
-- Enquanto qualquer uma dessas 5 variáveis faltar, o modal não aparece e o site funciona como antes.
+- Enquanto qualquer uma dessas 3 variáveis faltar, a etapa de cadastro e o modal não aparecem, e o site abre o plano direto.
 - Depois de mudar variáveis, reinicie o `npm run dev` ou gere um novo build.
 
 ## 6. Testar

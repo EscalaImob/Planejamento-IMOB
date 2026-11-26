@@ -11,7 +11,7 @@ import type { ControleModalLead } from "@/lib/useCapturaLead";
  * Desktop: cartão central. Mobile (< 640 px): painel inferior.
  * Fechar o modal não apaga o planejamento nem o que foi digitado.
  */
-export function ModalLead({ c, urlPolitica, linkPlano }: { c: ControleModalLead; urlPolitica: string; linkPlano: () => string }) {
+export function ModalLead({ c, linkPlano }: { c: ControleModalLead; linkPlano: () => string }) {
   const ref = useRef<HTMLDialogElement>(null);
   const origemFoco = useRef<HTMLElement | null>(null);
   const aberto = c.estado !== "fechado";
@@ -104,7 +104,6 @@ export function ModalLead({ c, urlPolitica, linkPlano }: { c: ControleModalLead;
           <>
           <FormularioLead
             f={c.form}
-            urlPolitica={urlPolitica}
             textoBotao="Salvar meu planejamento"
             onEnviar={c.enviar}
             cabecalho={

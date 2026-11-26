@@ -11,7 +11,6 @@ const ID_CAMPO: Record<CampoLead, string> = {
   nome: "lead-nome",
   whatsapp: "lead-whatsapp",
   email: "lead-email",
-  privacidade: "lead-privacidade",
   marketing: "lead-marketing",
 };
 
@@ -21,13 +20,11 @@ const ID_CAMPO: Record<CampoLead, string> = {
  */
 export function FormularioLead({
   f,
-  urlPolitica,
   textoBotao,
   onEnviar,
   cabecalho,
 }: {
   f: ControleFormularioLead;
-  urlPolitica: string;
   textoBotao: string;
   /** Devolve o primeiro campo inválido (para receber o foco), ou null. */
   onEnviar: () => Promise<CampoLead | null>;
@@ -96,20 +93,6 @@ export function FormularioLead({
         Escala IMOB entenda seu cenário caso entre em contato com você.
       </p>
 
-      <Caixa
-        id={ID_CAMPO.privacidade}
-        marcada={f.form.privacidade}
-        onAlterar={(v) => f.alterar("privacidade", v)}
-        erro={f.erros.privacidade}
-        disabled={f.enviando}
-      >
-        Li e estou ciente da{" "}
-        <a href={urlPolitica} target="_blank" rel="noopener noreferrer" className="font-semibold text-azul underline underline-offset-2">
-          Política de Privacidade
-          <span className="sr-only"> (abre em nova aba)</span>
-        </a>
-        .
-      </Caixa>
       <Caixa id={ID_CAMPO.marketing} marcada={f.form.marketing} onAlterar={(v) => f.alterar("marketing", v)} disabled={f.enviando}>
         Quero receber conteúdos e ofertas da Escala IMOB por e-mail e WhatsApp. <span className="text-corpo">(opcional)</span>
       </Caixa>

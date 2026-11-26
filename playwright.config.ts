@@ -35,8 +35,6 @@ export default defineConfig({
         LEADS_SHEETS_WEBHOOK_URL: "http://127.0.0.1:3999/",
         LEADS_SHEETS_TOKEN: TOKEN_TESTE,
         LEADS_IP_SALT: "salt-de-teste-1234567890",
-        PRIVACY_POLICY_VERSION: "teste-e2e",
-        NEXT_PUBLIC_PRIVACY_POLICY_URL: "https://example.com/politica-de-privacidade",
         LEADS_RATE_LIMIT: "1000",
       },
     },

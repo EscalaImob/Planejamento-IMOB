@@ -10,8 +10,6 @@ const CONFIG: ConfigLeads = {
   webhookUrl: "https://script.google.com/macros/s/teste/exec",
   token: "t".repeat(32),
   ipSalt: "s".repeat(20),
-  versaoPolitica: "2026-12-01",
-  urlPolitica: "https://escalaimob.com.br/privacidade",
   origensPermitidas: [],
   limiteEnvios: 5,
 };
@@ -23,7 +21,6 @@ function corpoValido(extra: Record<string, unknown> = {}) {
     nome: "Maria Souza",
     whatsapp: "(11) 98765-4321",
     email: "Maria@Exemplo.com",
-    privacidade: true,
     marketing: false,
     submission_key: "6f1c1d7e-2c9a-4c1e-9d43-0a1f2b3c4d5e",
     acao: "pdf",
@@ -104,8 +101,8 @@ describe("POST /api/leads", () => {
       referral_id: "parceiro-7",
       marketing_consent: false,
       marketing_consent_at: null,
-      privacy_policy_version: "2026-12-01",
-      privacy_acknowledged_at: "2026-11-26T12:00:00.000Z",
+      privacy_policy_version: null,
+      privacy_acknowledged_at: null,
       source_action: "pdf",
       crm_sync_status: "pending",
     });
@@ -144,10 +141,10 @@ describe("POST /api/leads", () => {
 
   it("valida no servidor e devolve erros por campo (400)", async () => {
     const { deps, destino } = montar();
-    const res = await tratarEnvioLead(requisicao(corpoValido({ nome: "M", whatsapp: "123", email: "x", privacidade: false })), deps);
+    const res = await tratarEnvioLead(requisicao(corpoValido({ nome: "M", whatsapp: "123", email: "x" })), deps);
     expect(res.status).toBe(400);
     const corpo = await res.json();
-    expect(Object.keys(corpo.campos).sort()).toEqual(["email", "nome", "privacidade", "whatsapp"]);
+    expect(Object.keys(corpo.campos).sort()).toEqual(["email", "nome", "whatsapp"]);
     expect((destino as DestinoFalso).linhas).toHaveLength(0);
   });
 
@@ -255,8 +252,6 @@ describe("configuração", () => {
     LEADS_SHEETS_WEBHOOK_URL: "https://script.google.com/macros/s/abc/exec",
     LEADS_SHEETS_TOKEN: "t".repeat(32),
     LEADS_IP_SALT: "s".repeat(20),
-    PRIVACY_POLICY_VERSION: "2026-12-01",
-    NEXT_PUBLIC_PRIVACY_POLICY_URL: "https://escalaimob.com.br/privacidade",
   } as unknown as NodeJS.ProcessEnv;
 
   it("ativa só com todas as variáveis válidas", () => {

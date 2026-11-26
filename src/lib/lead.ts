@@ -55,7 +55,6 @@ export const MENSAGENS = {
   nome: "Informe seu nome completo (nome e sobrenome).",
   whatsapp: "Informe um WhatsApp válido com DDD, por exemplo (11) 98765-4321.",
   email: "Informe um e-mail válido, por exemplo nome@empresa.com.br.",
-  privacidade: "Para salvar, confirme que está ciente da Política de Privacidade.",
 } as const;
 
 export const esquemaFormularioLead = z.object({
@@ -71,12 +70,11 @@ export const esquemaFormularioLead = z.object({
     .trim()
     .max(254, MENSAGENS.email)
     .pipe(z.email(MENSAGENS.email)),
-  privacidade: z.literal(true, MENSAGENS.privacidade),
   marketing: z.boolean(),
 });
 
-/** Estado do formulário no modal (a ciência da política começa desmarcada e é validada no envio). */
-export type FormularioLead = { nome: string; whatsapp: string; email: string; privacidade: boolean; marketing: boolean };
+/** Estado do formulário (autorização de marketing opcional, começa desmarcada). */
+export type FormularioLead = { nome: string; whatsapp: string; email: string; marketing: boolean };
 export type CampoLead = keyof FormularioLead;
 
 /** Erros por campo (primeira mensagem de cada um). */

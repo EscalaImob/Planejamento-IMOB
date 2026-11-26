@@ -24,7 +24,7 @@ import { registrarEvento } from "@/lib/eventos";
  */
 export const CHAVE_SESSAO_LEAD = "escala-imob:lead-salvo-sessao";
 
-const FORM_VAZIO: FormularioLead = { nome: "", whatsapp: "", email: "", privacidade: false, marketing: false };
+const FORM_VAZIO: FormularioLead = { nome: "", whatsapp: "", email: "", marketing: false };
 
 export function salvoNaSessao(): boolean {
   try {
@@ -95,9 +95,9 @@ export function useFormularioLead(respostas: Respostas) {
     async (acao: AcaoLead): Promise<ResultadoEnvio> => {
       if (travado.current) return { ok: false };
       const errosLocais = errosDoFormulario(form);
-      setTocados({ nome: true, whatsapp: true, email: true, privacidade: true });
+      setTocados({ nome: true, whatsapp: true, email: true });
       setErros(errosLocais);
-      const primeiro = (["nome", "whatsapp", "email", "privacidade"] as CampoLead[]).find((c) => errosLocais[c]);
+      const primeiro = (["nome", "whatsapp", "email"] as CampoLead[]).find((c) => errosLocais[c]);
       if (primeiro) return { ok: false, campoInvalido: primeiro };
 
       travado.current = true;
@@ -106,7 +106,6 @@ export function useFormularioLead(respostas: Respostas) {
       if (!abertoEm.current) abertoEm.current = Date.now();
       const corpo: EnvioLead = {
         ...form,
-        privacidade: true, // validado acima
         submission_key: chave.current ?? (chave.current = novaChave()),
         acao,
         tempo_ms: Math.max(0, Date.now() - abertoEm.current),

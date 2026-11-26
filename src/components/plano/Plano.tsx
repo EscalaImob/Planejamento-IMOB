@@ -37,7 +37,6 @@ type Props = {
   onRecomecar: () => void;
   /** Captura de lead ao exportar (definida no servidor). */
   capturaAtiva?: boolean;
-  urlPolitica?: string | null;
 };
 
 /* ───────── Peças ───────── */
@@ -176,7 +175,7 @@ function CartaoCanal({ l, i, r }: { l: LinhaPlano; i: number; r: Respostas }) {
 
 /* ───────── Plano ───────── */
 
-export function Plano({ r, onAjustar, onRecomecar, capturaAtiva = false, urlPolitica = null }: Props) {
+export function Plano({ r, onAjustar, onRecomecar, capturaAtiva = false }: Props) {
   const plano = useMemo(() => gerarPlano(r), [r]);
   const t = ticketMedio(r);
   const total26 = imoveis2026(r);
@@ -271,7 +270,7 @@ export function Plano({ r, onAjustar, onRecomecar, capturaAtiva = false, urlPoli
 
   /* Captura de lead antes de salvar/exportar (desligada sem configuração no servidor) */
   const executores = useMemo(() => ({ pdf: () => window.print(), link: copiar }), [copiar]);
-  const captura = useCapturaLead({ ativa: capturaAtiva && !!urlPolitica, respostas: r, executores });
+  const captura = useCapturaLead({ ativa: capturaAtiva, respostas: r, executores });
 
   const recomecar = () => {
     if (window.confirm("Apagar todas as respostas salvas neste navegador e começar um novo planejamento?")) onRecomecar();
@@ -674,7 +673,7 @@ export function Plano({ r, onAjustar, onRecomecar, capturaAtiva = false, urlPoli
           comissão.
         </p>
       </div>
-      {capturaAtiva && urlPolitica && <ModalLead c={captura.modal} urlPolitica={urlPolitica} linkPlano={() => gerarLinkPlano(r)} />}
+      {capturaAtiva && <ModalLead c={captura.modal} linkPlano={() => gerarLinkPlano(r)} />}
     </div>
   );
 }

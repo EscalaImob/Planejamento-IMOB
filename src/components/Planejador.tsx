@@ -23,7 +23,7 @@ const SUBTITULOS = [
   "Seu plano de aquisição para 2027.",
 ];
 
-export function Planejador({ captura = { ativa: false, urlPolitica: null } }: { captura?: { ativa: boolean; urlPolitica: string | null } }) {
+export function Planejador({ captura = { ativa: false } }: { captura?: { ativa: boolean } }) {
   const { respostas: r, pronto, atualizar, ir, podeIr, recomecar } = usePlanejamento();
   const [aviso, setAviso] = useState<string | null>(null);
   const [gerando, setGerando] = useState(false);
@@ -50,7 +50,7 @@ export function Planejador({ captura = { ativa: false, urlPolitica: null } }: { 
   }, [atualizar]);
 
   // Cadastro obrigatório antes do plano quando a captura está ativa (quem abriu por link compartilhado não precisa).
-  const capturaAtiva = captura.ativa && !!captura.urlPolitica;
+  const capturaAtiva = captura.ativa;
   const precisaCadastro = capturaAtiva && !r.cadastrado && !r.viaLink;
 
   // Nunca exibir uma etapa cujos pré-requisitos não estão preenchidos (rascunho antigo ou link incompleto).
@@ -136,7 +136,6 @@ export function Planejador({ captura = { ativa: false, urlPolitica: null } }: { 
         <Casca {...base} etapa={4} subtitulo="Falta só informar para quem é o plano.">
           <EtapaCadastro
             r={r}
-            urlPolitica={captura.urlPolitica!}
             onConcluir={() => {
               // Na mesma atualização: o plano fica disponível enquanto a transição "gerando" aparece por cima.
               atualizar({ cadastrado: true, planoGerado: true, etapa: 4 });
@@ -160,7 +159,6 @@ export function Planejador({ captura = { ativa: false, urlPolitica: null } }: { 
           }}
           onRecomecar={recomecar}
           capturaAtiva={capturaAtiva && !r.cadastrado}
-          urlPolitica={captura.urlPolitica}
         />
       </Casca>
       {gerando && <Gerando onConcluir={concluirGeracao} />}

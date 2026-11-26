@@ -46,7 +46,7 @@ describe("telefone", () => {
 });
 
 describe("formulário", () => {
-  const valido = { nome: "Maria Souza", whatsapp: "(11) 98765-4321", email: "Maria@Exemplo.com ", privacidade: true, marketing: false };
+  const valido = { nome: "Maria Souza", whatsapp: "(11) 98765-4321", email: "Maria@Exemplo.com ", marketing: false };
 
   it("aceita dados válidos", () => {
     expect(errosDoFormulario(valido)).toEqual({});
@@ -54,10 +54,9 @@ describe("formulário", () => {
   });
 
   it("dá uma mensagem por campo", () => {
-    const erros = errosDoFormulario({ nome: "Maria", whatsapp: "123", email: "maria@", privacidade: false, marketing: false });
-    expect(Object.keys(erros).sort()).toEqual(["email", "nome", "privacidade", "whatsapp"]);
+    const erros = errosDoFormulario({ nome: "Maria", whatsapp: "123", email: "maria@", marketing: false });
+    expect(Object.keys(erros).sort()).toEqual(["email", "nome", "whatsapp"]);
     expect(erros.nome).toMatch(/nome completo/);
-    expect(erros.privacidade).toMatch(/Política de Privacidade/);
   });
 
   it("marketing é opcional", () => {
@@ -77,7 +76,6 @@ describe("formulário", () => {
     expect(esquemaEnvioLead.safeParse(envio).success).toBe(true);
     expect(esquemaEnvioLead.safeParse({ ...envio, acao: "csv" }).success).toBe(false);
     expect(esquemaEnvioLead.safeParse({ ...envio, submission_key: "x" }).success).toBe(false);
-    expect(esquemaEnvioLead.safeParse({ ...envio, privacidade: false }).success).toBe(false);
   });
 });
 

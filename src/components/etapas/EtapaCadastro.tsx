@@ -23,11 +23,9 @@ const ENTREGAS = [
  */
 export function EtapaCadastro({
   r,
-  urlPolitica,
   onConcluir,
 }: {
   r: Respostas;
-  urlPolitica: string;
   onConcluir: () => void;
 }) {
   const f = useFormularioLead(r);
@@ -67,7 +65,6 @@ export function EtapaCadastro({
         >
           <FormularioLead
             f={f}
-            urlPolitica={urlPolitica}
             textoBotao="Gerar meu Plano 2027"
             onEnviar={async () => {
               const resultado = await f.enviar("cadastro");

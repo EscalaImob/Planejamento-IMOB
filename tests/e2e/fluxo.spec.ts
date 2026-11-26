@@ -94,7 +94,6 @@ test("fluxo completo: validação, voltar, avançar e conclusão", async ({ page
   await page.getByLabel("Nome completo").fill("Maria Souza");
   await page.getByLabel("WhatsApp", { exact: true }).pressSequentially("11987654321");
   await page.getByLabel("E-mail", { exact: true }).fill("maria@exemplo.com");
-  await page.getByRole("checkbox", { name: /Política de Privacidade/ }).check();
   await page.waitForTimeout(2100); // tempo mínimo do antispam
   await page.getByRole("button", { name: "Gerar meu Plano 2027" }).click();
 

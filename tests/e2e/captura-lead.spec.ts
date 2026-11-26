@@ -54,7 +54,6 @@ async function preencher(page: Page, { marketing = false } = {}) {
   await d.getByLabel("Nome completo").fill("Maria Souza");
   await d.getByLabel("WhatsApp", { exact: true }).pressSequentially("11987654321");
   await d.getByLabel("E-mail", { exact: true }).fill("Maria@Exemplo.com");
-  await d.getByRole("checkbox", { name: /Política de Privacidade/ }).check();
   if (marketing) await d.getByRole("checkbox", { name: /Quero receber/ }).check();
   await page.waitForTimeout(2100); // tempo mínimo do antispam
 }
@@ -83,7 +82,7 @@ test("Baixar PDF: valida, grava na planilha, confirma e só então imprime; segu
   await expect(d.getByText("Informe seu nome completo (nome e sobrenome).")).toBeVisible();
   await expect(d.getByText(/Informe um WhatsApp válido/)).toBeVisible();
   await expect(d.getByText(/Informe um e-mail válido/)).toBeVisible();
-  await expect(d.getByText(/confirme que está ciente da Política de Privacidade/)).toBeVisible();
+  await expect(d.getByRole("checkbox", { name: /Política de Privacidade/ })).toHaveCount(0);
   await expect(d.getByLabel("Nome completo")).toBeFocused();
 
   // máscara
@@ -114,7 +113,6 @@ test("Baixar PDF: valida, grava na planilha, confirma e só então imprime; segu
     utm_campaign: "lancamento",
     referral_id: "parceiro-7",
     marketing_consent: true,
-    privacy_policy_version: "teste-e2e",
     source_action: "pdf",
   });
   expect(linhas[0].marketing_consent_at).toBeTruthy();
@@ -273,7 +271,6 @@ async function preencherCadastro(page: Page) {
   await page.getByLabel("Nome completo").fill("Maria Souza");
   await page.getByLabel("WhatsApp", { exact: true }).pressSequentially("11987654321");
   await page.getByLabel("E-mail", { exact: true }).fill("maria@exemplo.com");
-  await page.getByRole("checkbox", { name: /Política de Privacidade/ }).check();
   await page.waitForTimeout(2100);
 }
 

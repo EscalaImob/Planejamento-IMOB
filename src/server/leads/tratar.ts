@@ -72,7 +72,7 @@ export async function tratarEnvioLead(req: Request, deps: Dependencias): Promise
     const campos: Partial<Record<CampoLead, string>> = {};
     for (const issue of validado.error.issues) {
       const campo = issue.path[0] as CampoLead;
-      if (["nome", "whatsapp", "email", "privacidade"].includes(campo) && !campos[campo]) campos[campo] = issue.message;
+      if (["nome", "whatsapp", "email"].includes(campo) && !campos[campo]) campos[campo] = issue.message;
     }
     log("[leads] recusado: validacao");
     return json(400, { ok: false, erro: "validacao", campos });
@@ -111,8 +111,9 @@ export async function tratarEnvioLead(req: Request, deps: Dependencias): Promise
     referral_id: envio.origem.referral_id ?? null,
     marketing_consent: envio.marketing,
     marketing_consent_at: envio.marketing ? momento : null,
-    privacy_policy_version: config.versaoPolitica,
-    privacy_acknowledged_at: momento,
+    // Sem Política de Privacidade no fluxo (decisão de 26/11/2026): colunas mantidas, em branco.
+    privacy_policy_version: null,
+    privacy_acknowledged_at: null,
     source_action: envio.acao,
     ip_hash: ipHash,
     crm_sync_status: "pending",
